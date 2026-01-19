@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Chameleon Studios | Where Your Vision Transforms™</title>
+    <meta name="description" content="Transform your ideas into stunning artwork. AI-powered art generation, card creation, and creative tools.">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🦎</text></svg>">
+    <style>
+:root{--bg:#050508;--surface:#0d0d12;--card:rgba(255,255,255,0.03);--border:rgba(255,255,255,0.08);--border-bright:rgba(255,255,255,0.15);--text:#f8f8f8;--text-dim:#9ca3af;--text-muted:#6b7280;--stellar:#FF6B35;--stellar-dim:rgba(255,107,53,0.15);--stellar-glow:rgba(255,107,53,0.4);--purple:#8B5CF6;--teal:#14B8A6;--pink:#EC4899;--gold:#F59E0B;--emerald:#10B981;--success:#22C55E;--error:#EF4444;--canvas-bg:#0f0f1a;--radius-sm:8px;--radius-md:12px;--radius-lg:20px;--radius-xl:28px;--shadow-lg:0 20px 60px rgba(0,0,0,0.5)}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;line-height:1.6;overflow-x:hidden}
+@keyframes shimmer{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.5}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes glow{0%,100%{box-shadow:0 0 20px var(--stellar-glow)}50%{box-shadow:0 0 40px var(--stellar-glow)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.gradient-stellar{background:linear-gradient(135deg,var(--stellar),var(--gold),var(--pink));background-size:200% 200%;animation:shimmer 6s ease infinite}
+.gradient-text{background:linear-gradient(135deg,var(--stellar),var(--gold),var(--pink),var(--purple));background-size:300% 300%;animation:shimmer 8s ease infinite;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+header{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(5,5,8,0.9);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:0 24px;height:70px}
+.header-inner{max-width:1600px;margin:0 auto;height:100%;display:flex;align-items:center;gap:20px}
+.logo{display:flex;align-items:center;gap:14px;cursor:pointer;flex-shrink:0}
+.logo-icon{width:46px;height:46px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:26px}
+.logo-text{font-size:24px;font-weight:800;letter-spacing:-0.5px}
+.logo-tagline{font-size:11px;color:var(--text-muted);letter-spacing:0.5px;margin-top:2px}
+.nav-main{display:flex;gap:6px;margin-left:auto;background:var(--surface);padding:5px;border-radius:var(--radius-md);border:1px solid var(--border)}
+.nav-btn{padding:10px 18px;border:none;background:transparent;color:var(--text-dim);font-size:13px;font-weight:600;cursor:pointer;border-radius:var(--radius-sm);transition:all 0.2s;display:flex;align-items:center;gap:8px}
+.nav-btn:hover{color:var(--text);background:var(--card)}
+.nav-btn.active{background:var(--stellar);color:#fff;box-shadow:0 4px 12px var(--stellar-glow)}
+main{padding-top:70px;min-height:100vh}
+.section{display:none;animation:fadeIn 0.3s ease}
+.section.active{display:block}
+.hero-section{padding:60px 24px 40px;text-align:center;position:relative;overflow:hidden}
+.hero-section::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:800px;height:600px;background:radial-gradient(ellipse,rgba(255,107,53,0.08) 0%,transparent 70%);pointer-events:none}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;padding:10px 20px;border-radius:50px;font-size:13px;font-weight:600;margin-bottom:24px;border:1px solid var(--stellar);color:var(--stellar);background:var(--stellar-dim)}
+.hero-title{font-size:clamp(36px,6vw,56px);font-weight:800;line-height:1.1;margin-bottom:20px;letter-spacing:-1px}
+.hero-subtitle{font-size:18px;color:var(--text-dim);max-width:600px;margin:0 auto 32px;line-height:1.7}
+.mode-selector{display:flex;gap:20px;justify-content:center;flex-wrap:wrap;max-width:900px;margin:0 auto}
+.mode-card{flex:1;min-width:260px;max-width:400px;padding:28px;border-radius:var(--radius-lg);background:var(--surface);border:2px solid var(--border);cursor:pointer;transition:all 0.3s;text-align:left;position:relative;overflow:hidden}
+.mode-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;opacity:0;transition:opacity 0.3s}
+.mode-card:hover{border-color:var(--border-bright);transform:translateY(-4px);box-shadow:var(--shadow-lg)}
+.mode-card:hover::before{opacity:1}
+.mode-card[data-mode="gallery"]::before{background:linear-gradient(90deg,var(--emerald),var(--teal))}
+.mode-card[data-mode="generate"]::before{background:linear-gradient(90deg,var(--stellar),var(--gold))}
+.mode-card[data-mode="cards"]::before{background:linear-gradient(90deg,var(--purple),var(--pink))}
+.mode-card-icon{width:60px;height:60px;border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;font-size:32px;margin-bottom:16px}
+.mode-card-title{font-size:20px;font-weight:700;margin-bottom:8px}
+.mode-card-desc{font-size:14px;color:var(--text-dim);line-height:1.6}
+.mode-card-badge{position:absolute;top:16px;right:16px;padding:4px 12px;border-radius:20px;font-size:10px;font-weight:700;text-transform:uppercase}
+.gallery-section,.generate-section,.cards-section{padding:40px 24px 80px}
+.gallery-header{max-width:1400px;margin:0 auto 32px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px}
+.gallery-title{font-size:28px;font-weight:700}
+.gallery-filters{display:flex;gap:8px;flex-wrap:wrap}
+.filter-chip{padding:8px 16px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--text-dim);font-size:12px;font-weight:600;cursor:pointer;transition:all 0.2s}
+.filter-chip:hover{border-color:var(--stellar);color:var(--text)}
+.filter-chip.active{background:var(--stellar);border-color:var(--stellar);color:#fff}
+.gallery-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:24px;max-width:1400px;margin:0 auto}
+.gallery-item{aspect-ratio:4/3;border-radius:var(--radius-lg);overflow:hidden;position:relative;cursor:pointer;border:2px solid transparent;transition:all 0.3s}
+.gallery-item:hover{border-color:var(--stellar);transform:scale(1.02)}
+.gallery-item-bg{position:absolute;inset:0}
+.gallery-item-canvas{width:100%;height:100%}
+.gallery-item-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.9) 0%,transparent 50%);display:flex;flex-direction:column;justify-content:flex-end;padding:20px;opacity:0;transition:opacity 0.3s}
+.gallery-item:hover .gallery-item-overlay{opacity:1}
+.gallery-item-title{font-size:16px;font-weight:700;margin-bottom:4px}
+.gallery-item-meta{font-size:12px;color:var(--text-dim)}
+.gallery-item-badge{position:absolute;top:12px;right:12px;padding:5px 12px;border-radius:20px;font-size:10px;font-weight:700;background:var(--stellar)}
+.generate-grid{display:grid;grid-template-columns:1fr;gap:32px;max-width:1400px;margin:0 auto}
+@media(min-width:1100px){.generate-grid{grid-template-columns:minmax(400px,480px) 1fr}}
+.draw-panel{border-radius:var(--radius-xl);padding:24px;background:var(--surface);border:2px solid var(--border);position:relative}
+.draw-panel::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;border-radius:var(--radius-xl) var(--radius-xl) 0 0;background:linear-gradient(90deg,var(--stellar),var(--gold),var(--pink))}
+.panel-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;padding-top:8px}
+.panel-title{font-size:18px;font-weight:700;display:flex;align-items:center;gap:10px}
+.panel-title .badge{font-size:10px;padding:4px 10px;border-radius:20px;background:var(--stellar);color:#fff;font-weight:700}
+.canvas-container{position:relative;background:var(--canvas-bg);border-radius:var(--radius-md);overflow:hidden;margin-bottom:20px;border:1px solid var(--border)}
+#mainCanvas{width:100%;aspect-ratio:4/3;display:block;cursor:crosshair;touch-action:none}
+.canvas-hint{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;transition:opacity 0.3s}
+.canvas-hint.hidden{opacity:0}
+.canvas-hint-icon{font-size:56px;margin-bottom:16px;animation:float 3s ease-in-out infinite}
+.canvas-hint-text{font-size:16px;color:var(--text-dim)}
+.canvas-hint-sub{font-size:13px;color:var(--text-muted);margin-top:6px}
+.tools-bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.tool-btn{padding:10px 14px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all 0.2s}
+.tool-btn:hover{background:var(--card);border-color:var(--border-bright)}
+.tool-btn.active{border-color:var(--stellar);background:var(--stellar-dim);color:var(--stellar)}
+.color-bar{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:16px}
+.color-swatch{width:28px;height:28px;border-radius:6px;cursor:pointer;border:2px solid transparent;transition:all 0.15s}
+.color-swatch:hover{transform:scale(1.15)}
+.color-swatch.active{border-color:#fff;box-shadow:0 0 12px rgba(255,255,255,0.4)}
+.brush-control{display:flex;align-items:center;gap:12px;margin-bottom:20px}
+.brush-control label{font-size:12px;color:var(--text-dim);font-weight:600}
+.brush-control input[type=range]{flex:1;accent-color:var(--stellar);height:6px;max-width:200px}
+.brush-control span{font-size:12px;color:var(--text-muted);min-width:40px}
+.desc-field{margin-bottom:20px}
+.desc-label{display:block;font-size:12px;font-weight:600;color:var(--text-dim);margin-bottom:8px}
+.desc-input{width:100%;padding:14px 16px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-md);color:var(--text);font-size:14px;transition:all 0.2s}
+.desc-input:focus{outline:none;border-color:var(--stellar);box-shadow:0 0 0 3px var(--stellar-dim)}
+.desc-input::placeholder{color:var(--text-muted)}
+.desc-hint{font-size:11px;color:var(--text-muted);margin-top:6px}
+.generate-btn{width:100%;padding:18px;border-radius:var(--radius-md);border:none;font-size:16px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;color:#fff;transition:all 0.3s}
+.generate-btn:hover{transform:translateY(-2px);box-shadow:0 12px 32px var(--stellar-glow)}
+.generate-btn:disabled{opacity:0.6;cursor:not-allowed;transform:none}
+.generate-btn.processing{animation:glow 2s ease-in-out infinite}
+.spinner{width:20px;height:20px;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin 0.8s linear infinite}
+.results-panel{border-radius:var(--radius-xl);padding:24px;background:var(--surface);border:1px solid var(--border)}
+.results-header{margin-bottom:24px}
+.results-title{font-size:20px;font-weight:700;margin-bottom:6px}
+.results-subtitle{font-size:13px;color:var(--text-dim)}
+.style-selector{margin-bottom:24px}
+.style-label{font-size:12px;font-weight:600;color:var(--text-dim);margin-bottom:10px;display:block}
+.style-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+@media(max-width:600px){.style-grid{grid-template-columns:repeat(2,1fr)}}
+.style-option{padding:14px 10px;border-radius:var(--radius-sm);border:2px solid var(--border);background:var(--bg);cursor:pointer;text-align:center;transition:all 0.2s}
+.style-option:hover{border-color:var(--border-bright);background:var(--card)}
+.style-option.active{border-color:var(--stellar);background:var(--stellar-dim)}
+.style-option .icon{font-size:24px;display:block;margin-bottom:6px}
+.style-option .name{font-size:11px;font-weight:700;display:block}
+.style-option .desc{font-size:9px;color:var(--text-muted);margin-top:2px}
+.results-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-bottom:24px}
+@media(max-width:600px){.results-grid{grid-template-columns:1fr}}
+.result-card{border-radius:var(--radius-md);overflow:hidden;border:2px solid transparent;transition:all 0.3s;cursor:pointer;background:var(--bg)}
+.result-card:hover{border-color:var(--border-bright)}
+.result-card.selected{border-color:var(--success);box-shadow:0 0 20px rgba(34,197,94,0.3)}
+.result-image{aspect-ratio:4/3;background:var(--canvas-bg);position:relative;overflow:hidden}
+.result-image canvas{width:100%;height:100%;display:block}
+.result-placeholder{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;background:linear-gradient(135deg,rgba(255,255,255,0.02),rgba(255,255,255,0.05))}
+.result-placeholder .icon{font-size:40px;opacity:0.4;margin-bottom:8px}
+.result-placeholder .text{font-size:12px;color:var(--text-muted);text-align:center}
+.result-info{padding:12px;background:rgba(0,0,0,0.4)}
+.result-info-title{font-size:13px;font-weight:700}
+.result-info-desc{font-size:10px;color:var(--text-dim);margin-top:2px}
+.actions-bar{display:flex;gap:10px;flex-wrap:wrap}
+.action-btn{flex:1;min-width:100px;padding:12px 16px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:all 0.2s}
+.action-btn:hover{background:var(--card);transform:translateY(-1px)}
+.action-btn.primary{background:var(--success);border-color:var(--success);color:#fff}
+.action-btn:disabled{opacity:0.5;cursor:not-allowed}
+.cards-layout{display:flex;gap:24px;max-width:1600px;margin:0 auto}
+@media(max-width:1200px){.cards-layout{flex-direction:column}}
+.cards-sidebar{width:280px;flex-shrink:0;display:flex;flex-direction:column;gap:16px}
+@media(max-width:1200px){.cards-sidebar{width:100%;flex-direction:row;flex-wrap:wrap}.cards-sidebar>*{flex:1;min-width:200px}}
+.sidebar-panel{background:var(--surface);border-radius:var(--radius-lg);padding:16px;border:1px solid var(--border)}
+.sidebar-title{font-size:13px;font-weight:700;color:var(--text-dim);margin-bottom:12px;text-transform:uppercase;letter-spacing:0.5px}
+.template-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.template-item{aspect-ratio:5/7;border-radius:var(--radius-sm);border:2px solid var(--border);cursor:pointer;position:relative;overflow:hidden;transition:all 0.2s}
+.template-item:hover{border-color:var(--stellar);transform:scale(1.03)}
+.template-item.active{border-color:var(--stellar);box-shadow:0 0 12px var(--stellar-glow)}
+.template-item-bg{position:absolute;inset:0}
+.template-item-icon{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:20px}
+.template-item-label{position:absolute;bottom:0;left:0;right:0;padding:4px;background:rgba(0,0,0,0.8);font-size:8px;text-align:center;font-weight:600}
+.texture-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.texture-item{aspect-ratio:1;border-radius:var(--radius-sm);border:2px solid var(--border);cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:center}
+.texture-item:hover{border-color:var(--stellar)}
+.texture-item.active{border-color:var(--stellar);box-shadow:0 0 12px var(--stellar-glow)}
+.element-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.element-item{aspect-ratio:1;border-radius:6px;border:1px solid var(--border);background:var(--bg);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;transition:all 0.15s}
+.element-item:hover{background:var(--card);border-color:var(--stellar);transform:scale(1.1)}
+.cards-workspace{flex:1;display:flex;flex-direction:column}
+.workspace-toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;padding:12px;background:var(--surface);border-radius:var(--radius-md);border:1px solid var(--border)}
+.cards-canvas-area{flex:1;display:flex;align-items:center;justify-content:center;padding:24px;background:var(--surface);border-radius:var(--radius-lg);border:1px solid var(--border);min-height:500px}
+.card-frame{position:relative;width:380px;aspect-ratio:5/7;border-radius:var(--radius-lg);overflow:hidden;box-shadow:var(--shadow-lg)}
+#cardCanvas{position:absolute;inset:0;width:100%;height:100%}
+.card-elements-layer{position:absolute;inset:0;pointer-events:none}
+.card-elements-layer>*{pointer-events:auto}
+.placed-element{position:absolute;cursor:move;user-select:none;filter:drop-shadow(2px 2px 4px rgba(0,0,0,0.5))}
+.placed-element:hover{filter:drop-shadow(0 0 8px var(--stellar-glow))}
+.placed-element.selected{outline:2px dashed var(--stellar);outline-offset:4px}
+.text-block{position:absolute;cursor:move;padding:4px 8px;border:2px solid transparent;border-radius:4px;user-select:none;max-width:90%}
+.text-block:hover{border-color:rgba(255,255,255,0.3)}
+.text-block.selected{border-color:var(--stellar);background:var(--stellar-dim)}
+.text-block.editing{cursor:text;border-color:var(--success)}
+.cards-right-panel{width:300px;flex-shrink:0;display:flex;flex-direction:column;gap:16px}
+@media(max-width:1200px){.cards-right-panel{width:100%}}
+.text-controls{display:flex;gap:6px;flex-wrap:wrap;padding:12px;background:var(--bg);border-radius:var(--radius-sm);margin-bottom:12px}
+.ctrl-btn{width:32px;height:32px;border:1px solid var(--border);background:var(--surface);color:var(--text);border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:12px}
+.ctrl-btn:hover{background:var(--card)}
+.ctrl-btn.active{background:var(--stellar);border-color:var(--stellar)}
+input[type="color"]{width:32px;height:32px;border:1px solid var(--border);border-radius:6px;cursor:pointer;padding:2px}
+.font-select{width:100%;padding:10px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:13px;margin-bottom:12px}
+.quick-text-btns{display:flex;flex-direction:column;gap:6px}
+.quick-text-btn{padding:10px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:12px;cursor:pointer;text-align:left}
+.quick-text-btn:hover{background:var(--card);border-color:var(--stellar)}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(100px);padding:14px 28px;border-radius:var(--radius-md);font-size:14px;font-weight:600;background:var(--success);color:#fff;z-index:300;transition:transform 0.4s cubic-bezier(0.23,1,0.32,1);box-shadow:var(--shadow-lg)}
+.toast.show{transform:translateX(-50%) translateY(0)}
+.toast.error{background:var(--error)}
+footer{border-top:1px solid var(--border);padding:40px 24px;text-align:center;background:var(--surface)}
+.footer-logo{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:12px}
+.footer-tagline{color:var(--text-muted);font-size:12px;margin-bottom:16px}
+.footer-links{display:flex;justify-content:center;gap:24px;margin-bottom:16px}
+.footer-links a{color:var(--text-dim);text-decoration:none;font-size:13px}
+.footer-copy{color:var(--text-muted);font-size:11px}
+.footer-tm{color:var(--text-muted);font-size:10px;margin-top:6px}
+@media(max-width:900px){.nav-main{display:none}}
+@media(max-width:768px){header{height:60px}.logo-text{font-size:18px}.logo-tagline{display:none}.card-frame{width:300px}}
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-inner">
+            <div class="logo" onclick="goHome()">
+                <div class="logo-icon gradient-stellar">🦎</div>
+                <div>
+                    <div class="logo-text gradient-text">Chameleon Studios</div>
+                    <div class="logo-tagline">Where Your Vision Transforms™</div>
+                </div>
+            </div>
+            <nav class="nav-main">
+                <button class="nav-btn active" onclick="showSection('home')" data-section="home">🏠 Home</button>
+                <button class="nav-btn" onclick="showSection('gallery')" data-section="gallery">🖼️ Gallery</button>
+                <button class="nav-btn" onclick="showSection('generate')" data-section="generate">✨ AI Art</button>
+                <button class="nav-btn" onclick="showSection('cards')" data-section="cards">💌 Cards</button>
+            </nav>
+        </div>
+    </header>
+    <main>
+        <section class="section active" id="section-home">
+            <div class="hero-section">
+                <div class="hero-badge">✨ AI-Powered Creative Platform</div>
+                <h1 class="hero-title">Create Stunning Art with <span class="gradient-text">Chameleon Studios</span></h1>
+                <p class="hero-subtitle">Transform your sketches into masterpieces. Create beautiful cards. Explore our gallery.</p>
+                <div class="mode-selector">
+                    <div class="mode-card" data-mode="gallery" onclick="showSection('gallery')">
+                        <div class="mode-card-icon" style="background:linear-gradient(135deg,rgba(16,185,129,0.2),rgba(20,184,166,0.2))">🖼️</div>
+                        <div class="mode-card-title">Art Gallery</div>
+                        <div class="mode-card-desc">Browse stunning AI-generated artwork for inspiration.</div>
+                        <div class="mode-card-badge" style="background:var(--emerald)">NEW</div>
+                    </div>
+                    <div class="mode-card" data-mode="generate" onclick="showSection('generate')">
+                        <div class="mode-card-icon" style="background:linear-gradient(135deg,rgba(255,107,53,0.2),rgba(245,158,11,0.2))">✨</div>
+                        <div class="mode-card-title">Chameleon Generation</div>
+                        <div class="mode-card-desc">Draw your idea, AI creates 4 unique style variations.</div>
+                        <div class="mode-card-badge" style="background:var(--stellar)">POPULAR</div>
+                    </div>
+                    <div class="mode-card" data-mode="cards" onclick="showSection('cards')">
+                        <div class="mode-card-icon" style="background:linear-gradient(135deg,rgba(139,92,246,0.2),rgba(236,72,153,0.2))">💌</div>
+                        <div class="mode-card-title">Card Studio</div>
+                        <div class="mode-card-desc">Create personalized cards with templates and text.</div>
+                        <div class="mode-card-badge" style="background:var(--purple)">CARDS</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <section class="section" id="section-gallery">
+            <div class="gallery-section">
+                <div class="gallery-header">
+                    <h2 class="gallery-title">🖼️ Art Gallery</h2>
+                    <div class="gallery-filters" id="galleryFilters"></div>
+                </div>
+                <div class="gallery-grid" id="galleryGrid"></div>
+            </div>
+        </section>
+        <section class="section" id="section-generate">
+            <div class="generate-section">
+                <div class="generate-grid">
+                    <div class="draw-panel">
+                        <div class="panel-header">
+                            <div class="panel-title">🎨 Your Sketch <span class="badge">DRAW</span></div>
+                            <button class="tool-btn" onclick="clearMainCanvas()">🗑️ Clear</button>
+                        </div>
+                        <div class="canvas-container">
+                            <canvas id="mainCanvas"></canvas>
+                            <div class="canvas-hint" id="canvasHint">
+                                <div class="canvas-hint-icon">✏️</div>
+                                <div class="canvas-hint-text">Draw your idea here</div>
+                                <div class="canvas-hint-sub">Sketch anything — house, tree, flower</div>
+                            </div>
+                        </div>
+                        <div class="tools-bar">
+                            <button class="tool-btn active" id="penTool" onclick="setDrawTool('pen')">✏️ Pen</button>
+                            <button class="tool-btn" id="brushTool" onclick="setDrawTool('brush')">🖌️ Brush</button>
+                            <button class="tool-btn" id="eraserTool" onclick="setDrawTool('eraser')">🧽 Eraser</button>
+                            <button class="tool-btn" onclick="undoMainCanvas()">↩️ Undo</button>
+                        </div>
+                        <div class="color-bar" id="colorBar"></div>
+                        <div class="brush-control">
+                            <label>Size:</label>
+                            <input type="range" id="brushSize" min="2" max="30" value="4" oninput="updateBrushSize()">
+                            <span id="brushSizeVal">4px</span>
+                        </div>
+                        <div class="desc-field">
+                            <label class="desc-label">Help AI understand (optional)</label>
+                            <input type="text" class="desc-input" id="aiDescription" placeholder="e.g., A cozy cabin">
+                            <div class="desc-hint">💡 More details = better art</div>
+                        </div>
+                        <button class="generate-btn gradient-stellar" id="generateBtn" onclick="generateArtVariations()">
+                            🦎 Generate Chameleon Art
+                        </button>
+                    </div>
+                    <div class="results-panel">
+                        <div class="results-header">
+                            <div class="results-title">🎨 AI Art Variations</div>
+                            <div class="results-subtitle">Your sketch in 4 unique styles</div>
+                        </div>
+                        <div class="style-selector">
+                            <label class="style-label">Output Styles</label>
+                            <div class="style-grid" id="styleGrid"></div>
+                        </div>
+                        <div class="results-grid" id="resultsGrid"></div>
+                        <div class="actions-bar" id="actionsBar" style="display:none">
+                            <button class="action-btn primary" onclick="downloadSelected()" id="downloadBtn" disabled>💾 Download</button>
+                            <button class="action-btn" onclick="regenerateArt()">🔄 Regenerate</button>
+                            <button class="action-btn" onclick="downloadAllArt()">📦 All</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <section class="section" id="section-cards">
+            <div class="cards-section">
+                <div class="cards-layout">
+                    <div class="cards-sidebar">
+                        <div class="sidebar-panel">
+                            <div class="sidebar-title">📋 Templates</div>
+                            <div class="template-grid" id="templateGrid"></div>
+                        </div>
+                        <div class="sidebar-panel">
+                            <div class="sidebar-title">🎨 Textures</div>
+                            <div class="texture-grid" id="textureGrid"></div>
+                        </div>
+                        <div class="sidebar-panel">
+                            <div class="sidebar-title">✨ Elements</div>
+                            <div class="element-grid" id="elementGrid"></div>
+                        </div>
+                    </div>
+                    <div class="cards-workspace">
+                        <div class="workspace-toolbar">
+                            <button class="tool-btn" onclick="addCardText()">T+ Text</button>
+                            <button class="tool-btn" onclick="regenerateCardBg()">🎨 Background</button>
+                            <button class="tool-btn" onclick="clearCardAll()">🗑️ Clear</button>
+                            <div style="margin-left:auto"><button class="action-btn primary" onclick="downloadCard()">💾 Download</button></div>
+                        </div>
+                        <div class="cards-canvas-area">
+                            <div class="card-frame" id="cardFrame">
+                                <canvas id="cardCanvas"></canvas>
+                                <div class="card-elements-layer" id="cardElements"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="cards-right-panel">
+                        <div class="sidebar-panel">
+                            <div class="sidebar-title">📝 Text Controls</div>
+                            <div class="text-controls">
+                                <button class="ctrl-btn" onclick="changeCardTextSize(-2)">−</button>
+                                <span id="cardFontSize" style="font-size:11px;min-width:30px;text-align:center;line-height:32px">24</span>
+                                <button class="ctrl-btn" onclick="changeCardTextSize(2)">+</button>
+                                <input type="color" id="cardTextColor" value="#ffffff" onchange="updateCardTextStyle()">
+                                <button class="ctrl-btn" id="cardBoldBtn" onclick="toggleCardBold()"><b>B</b></button>
+                                <button class="ctrl-btn" id="cardItalicBtn" onclick="toggleCardItalic()"><i>I</i></button>
+                                <button class="ctrl-btn" onclick="deleteCardSelected()">🗑️</button>
+                            </div>
+                            <select class="font-select" id="cardFontFamily" onchange="updateCardTextStyle()">
+                                <option value="Arial, sans-serif">Arial</option>
+                                <option value="Georgia, serif">Georgia</option>
+                                <option value="Verdana, sans-serif">Verdana</option>
+                                <option value="Impact, sans-serif">Impact</option>
+                            </select>
+                            <div class="quick-text-btns">
+                                <button class="quick-text-btn" onclick="addPresetCardText('title')">+ Title</button>
+                                <button class="quick-text-btn" onclick="addPresetCardText('message')">+ Message</button>
+                                <button class="quick-text-btn" onclick="addPresetCardText('signature')">+ Signature</button>
+                            </div>
+                        </div>
+                        <div class="sidebar-panel">
+                            <div class="sidebar-title">🎯 Card Type</div>
+                            <div class="template-grid" id="cardTypeGrid"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+    <footer>
+        <div class="footer-logo"><span>🦎</span><span class="gradient-text" style="font-size:18px;font-weight:700">Chameleon Studios</span></div>
+        <div class="footer-tagline">Where Your Vision Transforms™</div>
+        <div class="footer-links"><a href="#">Privacy</a><a href="#">Terms</a><a href="#">Contact</a></div>
+        <div class="footer-copy">© 2025 Chameleon Studios</div>
+        <div class="footer-tm">"Where Your Vision Transforms" is a trademark of Chameleon Studios</div>
+    </footer>
+    <div class="toast" id="toast"></div>
+t.x+'%;top:'+t.y+'%;font-size:'+t.fontSize+'px;color:'+t.color+';font-family:'+t.fontFamily+';'+(t.bold?'font-weight:bold;':'')+(t.italic?'font-style:italic;':'')+'text-shadow:2px 2px 4px rgba(0,0,0,0.8);" onmousedown="startDragText(event,\''+t.id+'\')" onclick="selectCardItem(\''+t.id+'\')" ondblclick="editCardText(\''+t.id+'\')" '+(t.editing?'contenteditable="true"':'')+'>'+t.text+'</div>').join('');layer.innerHTML=html;}
+let dragItem=null,dragOffset={x:0,y:0};
+window.startDragElement=function(e,id){e.preventDefault();dragItem=cardElements.find(el=>el.id===id);const r=document.getElementById('cardFrame').getBoundingClientRect();dragOffset.x=e.clientX-(dragItem.x/100*r.width);dragOffset.y=e.clientY-(dragItem.y/100*r.height);document.addEventListener('mousemove',dragElement);document.addEventListener('mouseup',stopDrag);};
+window.startDragText=function(e,id){const t=cardTexts.find(t=>t.id===id);if(t?.editing)return;e.preventDefault();dragItem=t;const r=document.getElementById('cardFrame').getBoundingClientRect();dragOffset.x=e.clientX-(dragItem.x/100*r.width);dragOffset.y=e.clientY-(dragItem.y/100*r.height);document.addEventListener('mousemove',dragElement);document.addEventListener('mouseup',stopDrag);};
+function dragElement(e){if(!dragItem)return;const r=document.getElementById('cardFrame').getBoundingClientRect();dragItem.x=Math.max(0,Math.min(90,((e.clientX-dragOffset.x)/r.width)*100));dragItem.y=Math.max(0,Math.min(90,((e.clientY-dragOffset.y)/r.height)*100));renderCardElements();}
+function stopDrag(){dragItem=null;document.removeEventListener('mousemove',dragElement);document.removeEventListener('mouseup',stopDrag);}
+window.selectCardItem=function(id){if(id){cardSelected=cardElements.find(e=>e.id===id)||cardTexts.find(t=>t.id===id);if(cardSelected?.fontSize){document.getElementById('cardFontSize').textContent=cardSelected.fontSize;document.getElementById('cardTextColor').value=cardSelected.color||'#ffffff';}}else{cardSelected=null;}renderCardElements();};
+window.deleteCardSelected=function(){if(!cardSelected)return;cardElements=cardElements.filter(e=>e.id!==cardSelected.id);cardTexts=cardTexts.filter(t=>t.id!==cardSelected.id);cardSelected=null;renderCardElements();toast('Deleted');};
+window.addCardText=function(){const id='text-'+(++cardIdCounter);cardTexts.push({id,text:'Double-click to edit',x:20+Math.random()*60,y:40+Math.random()*20,fontSize:24,fontFamily:'Arial, sans-serif',color:'#ffffff',bold:false,italic:false,editing:false});renderCardElements();};
+window.addPresetCardText=function(type){const id='text-'+(++cardIdCounter);const presets={title:{text:currentCardType.name,fontSize:36,y:10,bold:true},message:{text:currentCardType.templates[0],fontSize:24,y:45},signature:{text:'With love',fontSize:18,y:82,italic:true}};const p=presets[type];cardTexts.push({id,text:p.text,x:50-(p.text.length*1.2),y:p.y,fontSize:p.fontSize,fontFamily:'Georgia, serif',color:'#ffffff',bold:p.bold||false,italic:p.italic||false,editing:false});renderCardElements();};
+window.editCardText=function(id){cardTexts.forEach(t=>t.editing=(t.id===id));renderCardElements();setTimeout(()=>{const el=document.getElementById(id);if(el){el.focus();const range=document.createRange();range.selectNodeContents(el);const sel=window.getSelection();sel.removeAllRanges();sel.addRange(range);}},50);};
+document.addEventListener('click',function(e){if(!e.target.classList.contains('text-block')){cardTexts.forEach(t=>{if(t.editing){const el=document.getElementById(t.id);if(el)t.text=el.textContent;t.editing=false;}});renderCardElements();}});
+window.updateCardTextStyle=function(){if(!cardSelected?.fontSize)return;cardSelected.fontFamily=document.getElementById('cardFontFamily').value;cardSelected.color=document.getElementById('cardTextColor').value;renderCardElements();};
+window.changeCardTextSize=function(d){if(!cardSelected?.fontSize)return;cardSelected.fontSize=Math.max(10,Math.min(72,cardSelected.fontSize+d));document.getElementById('cardFontSize').textContent=cardSelected.fontSize;renderCardElements();};
+window.toggleCardBold=function(){if(!cardSelected?.fontSize)return;cardSelected.bold=!cardSelected.bold;document.getElementById('cardBoldBtn').classList.toggle('active',cardSelected.bold);renderCardElements();};
+window.toggleCardItalic=function(){if(!cardSelected?.fontSize)return;cardSelected.italic=!cardSelected.italic;document.getElementById('cardItalicBtn').classList.toggle('active',cardSelected.italic);renderCardElements();};
+window.clearCardAll=function(){if(!confirm('Clear everything?'))return;cardElements=[];cardTexts=[];cardSelected=null;generateCardBackground();renderCardElements();toast('Cleared');};
+window.downloadCard=function(){const exp=document.createElement('canvas');exp.width=cardCanvas.width;exp.height=cardCanvas.height;const ex=exp.getContext('2d');ex.drawImage(cardCanvas,0,0);cardElements.forEach(e=>{ex.font=(e.size*2)+'px Arial';ex.fillText(e.emoji,(e.x/100)*exp.width,(e.y/100)*exp.height+e.size*2);});cardTexts.forEach(t=>{let font='';if(t.italic)font+='italic ';if(t.bold)font+='bold ';font+=(t.fontSize*2)+'px '+t.fontFamily;ex.font=font;ex.fillStyle=t.color||'#fff';ex.shadowColor='rgba(0,0,0,0.8)';ex.shadowBlur=8;ex.shadowOffsetX=3;ex.shadowOffsetY=3;(t.text||'').split('\n').forEach((line,i)=>{ex.fillText(line,(t.x/100)*exp.width,(t.y/100)*exp.height+(t.fontSize*2)+(i*t.fontSize*2.4));});});ex.shadowColor='transparent';ex.font='14px Arial';ex.fillStyle='rgba(255,255,255,0.3)';ex.fillText('Made with Chameleon Studios',20,exp.height-20);const link=document.createElement('a');link.download='chameleon-card-'+currentCardType.id+'-'+Date.now()+'.png';link.href=exp.toDataURL('image/png');link.click();toast('Downloaded!');};
+function renderGallery(filter){const filtersEl=document.getElementById('galleryFilters');const gridEl=document.getElementById('galleryGrid');if(!filtersEl||!gridEl)return;let filterHtml='<button class="filter-chip '+(filter==='all'?'active':'')+'" onclick="filterGallery(\'all\')">All</button>';filterHtml+='<button class="filter-chip '+(filter==='featured'?'active':'')+'" onclick="filterGallery(\'featured\')">⭐ Featured</button>';ART_STYLES.forEach(s=>{filterHtml+='<button class="filter-chip '+(filter===s.id?'active':'')+'" onclick="filterGallery(\''+s.id+'\')">'+s.icon+' '+s.name+'</button>';});filtersEl.innerHTML=filterHtml;let items=filter==='featured'?GALLERY_ITEMS.filter(g=>g.featured):filter==='all'?GALLERY_ITEMS:GALLERY_ITEMS.filter(g=>g.style===filter);gridEl.innerHTML=items.map((g,i)=>{const style=ART_STYLES.find(s=>s.id===g.style);const template=CARD_TEMPLATES.find(t=>t.id===g.template);return '<div class="gallery-item" onclick="openGalleryItem(\''+g.id+'\')" style="background:linear-gradient(135deg,'+template.bg[0]+','+template.bg[1]+')"><div class="gallery-item-bg"><canvas class="gallery-item-canvas" id="gallery-canvas-'+i+'" width="280" height="210"></canvas></div>'+(g.featured?'<div class="gallery-item-badge">⭐ Featured</div>':'')+'<div class="gallery-item-overlay"><div class="gallery-item-title">'+g.title+'</div><div class="gallery-item-meta">'+style.icon+' '+style.name+' • '+template.name+'</div></div></div>';}).join('');setTimeout(()=>{items.forEach((g,i)=>{const canvas=document.getElementById('gallery-canvas-'+i);if(canvas){const ctx=canvas.getContext('2d');const style=ART_STYLES.find(s=>s.id===g.style);const fakeEdges=[];for(let j=0;j<100;j++){fakeEdges.push({x:rnd(20,260),y:rnd(20,190),r:rnd(100,255),g:rnd(100,255),b:rnd(100,255),brightness:rnd(50,200)});}style.generate(ctx,fakeEdges,280,210);}});},100);}
+window.filterGallery=function(filter){renderGallery(filter);};
+window.openGalleryItem=function(id){showSection('generate');toast('Try creating this style!');};
+window.toast=function(msg,type='success'){const t=document.getElementById('toast');t.textContent=msg;t.className='toast'+(type==='error'?' error':'');t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000);};
+document.addEventListener('keydown',function(e){if(e.key==='Escape')selectCardItem(null);if((e.key==='Delete'||e.key==='Backspace')&&cardSelected&&!['INPUT','TEXTAREA'].includes(document.activeElement.tagName)&&!document.activeElement.isContentEditable){e.preventDefault();deleteCardSelected();}if(e.ctrlKey&&e.key==='z'){e.preventDefault();if(currentSection==='generate')undoMainCanvas();}});
+})();
+</script>
+</body>
+</html>
