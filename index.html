@@ -1,0 +1,1266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chameleon Studios | Creative Chameleon Artflow™ - AI Art Generator</title>
+    <meta name="description" content="Draw your idea, AI creates stunning art. Sketch anything - houses, trees, flowers - get beautiful artistic variations.">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🦎</text></svg>">
+    <style>
+        :root{--teal:#0D9488;--emerald:#059669;--purple:#7C3AED;--pink:#DB2777;--orange:#EA580C;--gold:#D97706;--bg:#0a0a0a;--card-bg:rgba(255,255,255,0.05);--border:rgba(255,255,255,0.1);--text:#fafafa;--text-dim:#a1a1aa;--text-muted:#71717a;--success:#22c55e;--error:#ef4444;--stellar:#FF6B35;--canvas-bg:#1a1a2e}
+        *{margin:0;padding:0;box-sizing:border-box}
+        html{scroll-behavior:smooth}
+        body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;line-height:1.6;overflow-x:hidden}
+        @keyframes shimmer{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+        @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+        @keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+        @keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+        @keyframes glow{0%,100%{box-shadow:0 0 20px rgba(255,107,53,0.3)}50%{box-shadow:0 0 40px rgba(255,107,53,0.6)}}
+        @keyframes artReveal{0%{opacity:0;transform:scale(0.95)}100%{opacity:1;transform:scale(1)}}
+        .gradient-bg{background:linear-gradient(-45deg,var(--teal),var(--emerald),var(--purple),var(--pink),var(--orange));background-size:400% 400%;animation:shimmer 12s ease infinite}
+        .gradient-text{background:linear-gradient(-45deg,var(--teal),var(--purple),var(--pink),var(--orange));background-size:400% 400%;animation:shimmer 8s ease infinite;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+        .stellar-gradient{background:linear-gradient(-45deg,var(--stellar),var(--gold),var(--pink),var(--purple));background-size:400% 400%;animation:shimmer 8s ease infinite}
+        .glass{background:var(--card-bg);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid var(--border)}
+        .container{max-width:1400px;margin:0 auto;padding:0 24px}
+        
+        header{padding:20px 24px;border-bottom:1px solid var(--border)}
+        .header-inner{max-width:1400px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px}
+        .logo{display:flex;align-items:center;gap:12px}
+        .logo-icon{width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:28px}
+        .logo-text{font-size:26px;font-weight:800}
+        .tagline{color:var(--text-dim);font-size:14px}
+        
+        main{padding:40px 24px 80px}
+        .app-grid{display:grid;grid-template-columns:1fr;gap:32px;max-width:1400px;margin:0 auto}
+        @media(min-width:1024px){.app-grid{grid-template-columns:minmax(400px,500px) 1fr}}
+        
+        .hero{text-align:center;margin-bottom:48px}
+        .hero-badge{display:inline-flex;align-items:center;gap:8px;padding:10px 20px;border-radius:50px;font-size:14px;font-weight:600;margin-bottom:20px;border:2px solid var(--stellar)}
+        .hero h1{font-size:clamp(32px,5vw,48px);font-weight:800;margin-bottom:16px;line-height:1.2}
+        .hero p{color:var(--text-dim);font-size:18px;max-width:700px;margin:0 auto}
+        
+        .drawing-panel{border-radius:24px;padding:24px;border:2px solid var(--stellar);position:relative;overflow:hidden}
+        .drawing-panel::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,var(--stellar),var(--gold),var(--pink))}
+        .panel-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px}
+        .panel-title{font-size:20px;font-weight:700;display:flex;align-items:center;gap:10px}
+        .panel-title .badge{font-size:11px;padding:4px 12px;border-radius:20px;background:var(--stellar);color:#fff}
+        
+        .canvas-wrapper{position:relative;background:var(--canvas-bg);border-radius:16px;overflow:hidden;margin-bottom:20px}
+        #drawingCanvas{width:100%;aspect-ratio:4/3;cursor:crosshair;touch-action:none;display:block;background:#1a1a2e}
+        .canvas-hint{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;text-align:center;padding:20px;transition:opacity .3s}
+        .canvas-hint.hidden{opacity:0}
+        .canvas-hint-icon{font-size:64px;margin-bottom:16px;animation:float 3s ease-in-out infinite}
+        .canvas-hint-text{font-size:18px;color:var(--text-dim);max-width:280px}
+        .canvas-hint-sub{font-size:14px;color:var(--text-muted);margin-top:8px}
+        
+        .tools-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+        .tool-btn{padding:10px 14px;border-radius:10px;border:1px solid var(--border);background:var(--bg);cursor:pointer;color:var(--text);font-size:13px;font-weight:500;transition:all .2s;display:flex;align-items:center;gap:6px}
+        .tool-btn:hover{background:var(--card-bg);transform:translateY(-1px)}
+        .tool-btn.active{border-color:var(--stellar);background:rgba(255,107,53,.15);color:var(--stellar)}
+        .tool-btn .icon{font-size:16px}
+        
+        .colors-row{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:16px}
+        .color-swatch{width:28px;height:28px;border-radius:6px;cursor:pointer;border:2px solid transparent;transition:all .15s}
+        .color-swatch:hover{transform:scale(1.15)}
+        .color-swatch.active{border-color:#fff;box-shadow:0 0 12px rgba(255,255,255,.5)}
+        
+        .brush-row{display:flex;align-items:center;gap:12px;margin-bottom:20px}
+        .brush-row label{font-size:12px;color:var(--text-dim);font-weight:600;white-space:nowrap}
+        .brush-row input[type=range]{flex:1;accent-color:var(--stellar);height:6px}
+        .brush-row span{font-size:12px;color:var(--text-muted);min-width:35px}
+        
+        .desc-group{margin-bottom:20px}
+        .desc-label{display:block;font-size:13px;font-weight:600;color:var(--text-dim);margin-bottom:8px}
+        .desc-input{width:100%;padding:14px 16px;background:var(--bg);border:1px solid var(--border);border-radius:12px;color:var(--text);font-size:15px;transition:all .2s}
+        .desc-input:focus{outline:none;border-color:var(--stellar);box-shadow:0 0 0 3px rgba(255,107,53,.15)}
+        .desc-input::placeholder{color:var(--text-muted)}
+        .desc-hint{font-size:12px;color:var(--text-muted);margin-top:8px}
+        
+        .generate-btn{width:100%;padding:18px;border-radius:14px;border:none;font-size:18px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:12px;transition:all .3s;color:#fff}
+        .generate-btn:hover{transform:translateY(-2px);box-shadow:0 12px 32px rgba(255,107,53,.4)}
+        .generate-btn:disabled{opacity:.6;cursor:not-allowed;transform:none}
+        .generate-btn.processing{animation:glow 2s ease-in-out infinite}
+        .spinner{width:24px;height:24px;border:3px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin 1s linear infinite}
+        
+        .results-panel{border-radius:24px;padding:24px}
+        .results-header{margin-bottom:24px}
+        .results-title{font-size:22px;font-weight:700;margin-bottom:8px}
+        .results-subtitle{font-size:14px;color:var(--text-dim)}
+        
+        .ai-analysis{margin-bottom:24px;padding:20px;border-radius:16px;background:rgba(255,107,53,.1);border:1px solid rgba(255,107,53,.3)}
+        .ai-analysis-header{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+        .ai-analysis-header .icon{font-size:24px}
+        .ai-analysis-header .text{font-size:16px;font-weight:600}
+        .ai-analysis-content{font-size:15px;color:var(--text-dim);line-height:1.6}
+        .ai-analysis-content strong{color:var(--text)}
+        
+        .results-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+        @media(max-width:600px){.results-grid{grid-template-columns:1fr}}
+        
+        .result-card{border-radius:16px;overflow:hidden;border:2px solid transparent;transition:all .3s;cursor:pointer;background:var(--card-bg)}
+        .result-card:hover{border-color:var(--stellar);transform:translateY(-4px)}
+        .result-card.selected{border-color:var(--success);box-shadow:0 0 24px rgba(34,197,94,.3)}
+        .result-card.generating{animation:pulse 1.5s ease-in-out infinite}
+        .result-image{aspect-ratio:4/3;background:#1a1a2e;position:relative;overflow:hidden}
+        .result-image canvas{width:100%;height:100%;display:block}
+        .result-image.placeholder{display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(135deg,rgba(255,255,255,.02),rgba(255,255,255,.05))}
+        .result-image.placeholder .icon{font-size:48px;margin-bottom:12px;opacity:.4}
+        .result-image.placeholder .text{font-size:14px;color:var(--text-muted);text-align:center}
+        .result-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.9) 0%,transparent 50%);display:flex;flex-direction:column;justify-content:flex-end;padding:16px;opacity:0;transition:opacity .2s}
+        .result-card:hover .result-overlay{opacity:1}
+        .result-style{font-size:15px;font-weight:700;margin-bottom:4px}
+        .result-desc{font-size:12px;color:var(--text-dim)}
+        .result-badge{position:absolute;top:12px;right:12px;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600}
+        .result-loading{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.7)}
+        .result-loading .spinner{width:40px;height:40px;border-width:4px}
+        
+        .actions-row{display:flex;gap:12px;margin-top:24px;flex-wrap:wrap}
+        .action-btn{flex:1;min-width:140px;padding:14px 20px;border-radius:12px;border:1px solid var(--border);background:var(--bg);cursor:pointer;color:var(--text);font-size:14px;font-weight:600;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px}
+        .action-btn:hover{background:var(--card-bg);transform:translateY(-2px)}
+        .action-btn.primary{background:var(--success);border-color:var(--success);color:#fff}
+        .action-btn.primary:hover{background:#1ea34f}
+        .action-btn:disabled{opacity:.5;cursor:not-allowed}
+        
+        .status-msg{padding:16px 20px;border-radius:12px;font-size:14px;margin-bottom:20px;display:flex;align-items:center;gap:12px}
+        .status-msg.info{background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.3);color:#60a5fa}
+        .status-msg.success{background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.3);color:#4ade80}
+        .status-msg.error{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:#f87171}
+        .status-msg .icon{font-size:20px}
+        
+        .how-section{margin-top:60px;padding:40px 24px;background:rgba(255,255,255,.02);border-radius:24px}
+        .how-title{text-align:center;font-size:28px;font-weight:700;margin-bottom:40px}
+        .how-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:32px;max-width:1000px;margin:0 auto}
+        .how-step{text-align:center}
+        .how-number{width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700;margin:0 auto 16px}
+        .how-step h4{font-size:18px;font-weight:600;margin-bottom:8px}
+        .how-step p{font-size:14px;color:var(--text-dim);line-height:1.6}
+        
+        footer{border-top:1px solid var(--border);padding:40px 24px;margin-top:60px;text-align:center}
+        .footer-logo{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:16px}
+        .footer-logo .icon{font-size:24px}
+        .footer-logo .text{font-size:20px;font-weight:700}
+        .footer-links{display:flex;justify-content:center;gap:24px;margin-bottom:16px;flex-wrap:wrap}
+        .footer-links a{color:var(--text-dim);text-decoration:none;font-size:14px;transition:color .2s}
+        .footer-links a:hover{color:var(--text)}
+        .footer-copy{color:var(--text-muted);font-size:13px}
+        .footer-tm{color:var(--text-muted);font-size:11px;margin-top:8px}
+        
+        .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.9);display:flex;align-items:center;justify-content:center;z-index:2000;padding:24px;opacity:0;visibility:hidden;transition:all .3s}
+        .modal-overlay.open{opacity:1;visibility:visible}
+        .modal{max-width:500px;width:100%;padding:32px;border-radius:24px}
+        .modal h3{font-size:22px;font-weight:700;margin-bottom:16px}
+        .modal p{color:var(--text-dim);font-size:14px;margin-bottom:20px;line-height:1.6}
+        .modal-input{width:100%;padding:14px 16px;background:var(--bg);border:1px solid var(--border);border-radius:12px;color:var(--text);font-size:15px;margin-bottom:12px}
+        .modal-input:focus{outline:none;border-color:var(--stellar)}
+        .modal-btns{display:flex;gap:12px;margin-top:20px}
+        .modal-btns button{flex:1;padding:14px;border-radius:12px;font-size:15px;font-weight:600;cursor:pointer;transition:all .2s}
+        .modal-cancel{background:var(--bg);border:1px solid var(--border);color:var(--text)}
+        .modal-confirm{background:var(--stellar);border:none;color:#fff}
+        
+        .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(100px);padding:16px 28px;border-radius:14px;font-size:15px;font-weight:500;background:var(--success);color:#fff;z-index:3000;transition:transform .4s cubic-bezier(.23,1,.32,1);box-shadow:0 8px 32px rgba(0,0,0,.3)}
+        .toast.show{transform:translateX(-50%) translateY(0)}
+        .toast.error{background:var(--error)}
+        
+        @media(max-width:768px){
+            .header-inner{justify-content:center;text-align:center}
+            .hero h1{font-size:28px}
+            .tools-row{justify-content:center}
+            .colors-row{justify-content:center}
+            .actions-row{flex-direction:column}
+            .action-btn{min-width:100%}
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-inner">
+            <div class="logo">
+                <div class="logo-icon stellar-gradient">🦎</div>
+                <div>
+                    <div class="logo-text gradient-text">Chameleon Studios</div>
+                    <div class="tagline">Creative Chameleon Artflow™</div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="hero">
+            <div class="hero-badge stellar-gradient">✨ AI-Powered Art Generation</div>
+            <h1>Draw Your Idea, <span class="gradient-text">AI Creates Cool Art</span></h1>
+            <p>Sketch a house, tree, flower - anything! AI transforms your drawing into stunning artistic variations.</p>
+        </div>
+
+        <div class="app-grid">
+            <div class="drawing-panel glass">
+                <div class="panel-header">
+                    <div class="panel-title">
+                        <span>🎨 Your Sketch</span>
+                        <span class="badge">DRAW HERE</span>
+                    </div>
+                    <button class="tool-btn" onclick="clearCanvas()">
+                        <span class="icon">🗑️</span> Clear
+                    </button>
+                </div>
+
+                <div class="canvas-wrapper">
+                    <canvas id="drawingCanvas"></canvas>
+                    <div class="canvas-hint" id="canvasHint">
+                        <div class="canvas-hint-icon">✏️</div>
+                        <div class="canvas-hint-text">Draw your idea here</div>
+                        <div class="canvas-hint-sub">Sketch a house, tree, flower — anything!</div>
+                    </div>
+                </div>
+
+                <div class="tools-row">
+                    <button class="tool-btn active" id="penTool" onclick="setTool('pen')"><span class="icon">✏️</span> Pen</button>
+                    <button class="tool-btn" id="brushTool" onclick="setTool('brush')"><span class="icon">🖌️</span> Brush</button>
+                    <button class="tool-btn" id="eraserTool" onclick="setTool('eraser')"><span class="icon">🧽</span> Eraser</button>
+                    <button class="tool-btn" onclick="undoLast()"><span class="icon">↩️</span> Undo</button>
+                </div>
+
+                <div class="colors-row" id="colorPicker"></div>
+
+                <div class="brush-row">
+                    <label>Brush:</label>
+                    <input type="range" id="brushSize" min="2" max="30" value="4" oninput="updateBrushSize()">
+                    <span id="brushSizeVal">4px</span>
+                </div>
+
+                <div class="desc-group">
+                    <label class="desc-label">Help AI understand your drawing (optional but helps!)</label>
+                    <input type="text" class="desc-input" id="userDescription" placeholder="e.g., A cozy cabin in the mountains, sunset colors">
+                    <div class="desc-hint">💡 More details = better art variations</div>
+                </div>
+
+                <button class="generate-btn stellar-gradient" id="generateBtn" onclick="generateImages()">
+                    <span class="icon">🤖</span> Generate Cool Art from My Sketch
+                </button>
+            </div>
+
+            <div class="results-panel glass">
+                <div class="results-header">
+                    <div class="results-title">🖼️ AI Art Variations</div>
+                    <div class="results-subtitle">Your sketch transformed into stunning artwork</div>
+                </div>
+
+                <div id="statusArea"></div>
+                <div id="analysisArea"></div>
+
+                <div class="results-grid" id="resultsGrid">
+                    <div class="result-card">
+                        <div class="result-image placeholder">
+                            <span class="icon">🌟</span>
+                            <span class="text">Digital Painting<br><small>Draw to generate</small></span>
+                        </div>
+                    </div>
+                    <div class="result-card">
+                        <div class="result-image placeholder">
+                            <span class="icon">✨</span>
+                            <span class="text">Fantasy Render<br><small>Draw to generate</small></span>
+                        </div>
+                    </div>
+                    <div class="result-card">
+                        <div class="result-image placeholder">
+                            <span class="icon">🎨</span>
+                            <span class="text">Impressionist<br><small>Draw to generate</small></span>
+                        </div>
+                    </div>
+                    <div class="result-card">
+                        <div class="result-image placeholder">
+                            <span class="icon">⚡</span>
+                            <span class="text">Neon Cyberpunk<br><small>Draw to generate</small></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="actions-row" id="actionsRow" style="display:none">
+                    <button class="action-btn primary" onclick="downloadSelected()" id="downloadBtn" disabled>
+                        <span>💾</span> Download Selected
+                    </button>
+                    <button class="action-btn" onclick="regenerate()">
+                        <span>🔄</span> Regenerate
+                    </button>
+                    <button class="action-btn" onclick="downloadAll()">
+                        <span>📦</span> Download All
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="how-section">
+            <h3 class="how-title">How <span class="gradient-text">Artflow™</span> Works</h3>
+            <div class="how-grid">
+                <div class="how-step">
+                    <div class="how-number stellar-gradient">1</div>
+                    <h4>✏️ Sketch Your Idea</h4>
+                    <p>Draw anything — a house, tree, pet, landscape. It doesn't need to be perfect!</p>
+                </div>
+                <div class="how-step">
+                    <div class="how-number stellar-gradient">2</div>
+                    <h4>🤖 AI Analyzes It</h4>
+                    <p>Our AI examines your sketch to understand what you're drawing and its style.</p>
+                </div>
+                <div class="how-step">
+                    <div class="how-number stellar-gradient">3</div>
+                    <h4>🎨 Art Generated</h4>
+                    <p>AI creates 4 stunning variations: digital painting, fantasy, impressionist, and cyberpunk.</p>
+                </div>
+                <div class="how-step">
+                    <div class="how-number stellar-gradient">4</div>
+                    <h4>💾 Download & Use</h4>
+                    <p>Download your favorite version. Print it, share it, or use it for your projects!</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="footer-logo">
+            <span class="icon">🦎</span>
+            <span class="text gradient-text">Chameleon Studios</span>
+        </div>
+        <div class="footer-links">
+            <a href="#">Privacy</a>
+            <a href="#">Terms</a>
+            <a href="#">Contact</a>
+        </div>
+        <div class="footer-copy">© 2025 Stellar Studios. All rights reserved.</div>
+        <div class="footer-tm">Creative Chameleon Artflow™ is a trademark of Stellar Studios</div>
+    </footer>
+
+    <div class="modal-overlay glass" id="requestModal">
+        <div class="modal glass">
+            <h3>📧 Request Custom Edit</h3>
+            <p>Want a specific style or modification? Send us your request and we'll create custom artwork just for you.</p>
+            <input type="email" class="modal-input" id="requestEmail" placeholder="Your email address">
+            <textarea class="modal-input" id="requestDetails" rows="4" placeholder="Describe what you'd like..."></textarea>
+            <div class="modal-btns">
+                <button class="modal-cancel" onclick="closeRequestModal()">Cancel</button>
+                <button class="modal-confirm" onclick="submitRequest()">Send Request</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toastEl"></div>
+
+    <script>
+        // Config
+        const CONFIG = {
+            productName: 'Creative Chameleon Artflow™',
+            contactEmail: 'art@stellarstudios.com'
+        };
+
+        // Art Styles with procedural generation parameters
+        const ART_STYLES = [
+            {
+                id: 'digital-painting',
+                name: 'Digital Painting',
+                icon: '🌟',
+                desc: 'Rich, painterly strokes with depth',
+                badge: 'POPULAR',
+                badgeColor: '#22c55e',
+                generate: generateDigitalPainting
+            },
+            {
+                id: 'fantasy-render',
+                name: 'Fantasy Render',
+                icon: '✨',
+                desc: 'Magical glow & ethereal lighting',
+                badge: 'MAGICAL',
+                badgeColor: '#8b5cf6',
+                generate: generateFantasyRender
+            },
+            {
+                id: 'impressionist',
+                name: 'Impressionist',
+                icon: '🎨',
+                desc: 'Brushstroke-filled classic style',
+                badge: 'ARTISTIC',
+                badgeColor: '#f59e0b',
+                generate: generateImpressionist
+            },
+            {
+                id: 'neon-cyberpunk',
+                name: 'Neon Cyberpunk',
+                icon: '⚡',
+                desc: 'Electric neon with dark vibes',
+                badge: 'EDGY',
+                badgeColor: '#ec4899',
+                generate: generateNeonCyberpunk
+            }
+        ];
+
+        // State
+        let canvas, ctx;
+        let isDrawing = false;
+        let hasDrawn = false;
+        let currentTool = 'pen';
+        let currentColor = '#ffffff';
+        let brushSize = 4;
+        let paths = [];
+        let currentPath = [];
+        let isProcessing = false;
+        let selectedResult = null;
+        let generatedCanvases = {};
+        let lastAnalysis = null;
+
+        const COLORS = ['#ffffff','#000000','#ff6b6b','#feca57','#48dbfb','#1dd1a1','#ff9ff3','#54a0ff','#5f27cd','#ff6348'];
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', initCanvas);
+
+        function initCanvas() {
+            canvas = document.getElementById('drawingCanvas');
+            ctx = canvas.getContext('2d', { willReadFrequently: true });
+            
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width * 2;
+            canvas.height = rect.height * 2;
+            ctx.scale(2, 2);
+            
+            ctx.fillStyle = '#1a1a2e';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            
+            setupEvents();
+            setupColors();
+        }
+
+        function setupEvents() {
+            canvas.addEventListener('mousedown', startDraw);
+            canvas.addEventListener('mousemove', draw);
+            canvas.addEventListener('mouseup', endDraw);
+            canvas.addEventListener('mouseleave', endDraw);
+            canvas.addEventListener('touchstart', e => { e.preventDefault(); startDraw(e.touches[0]); });
+            canvas.addEventListener('touchmove', e => { e.preventDefault(); draw(e.touches[0]); });
+            canvas.addEventListener('touchend', endDraw);
+        }
+
+        function setupColors() {
+            const picker = document.getElementById('colorPicker');
+            COLORS.forEach((c, i) => {
+                const swatch = document.createElement('div');
+                swatch.className = 'color-swatch' + (i === 0 ? ' active' : '');
+                swatch.style.background = c;
+                swatch.onclick = () => selectColor(c, swatch);
+                picker.appendChild(swatch);
+            });
+        }
+
+        function getPos(e) {
+            const rect = canvas.getBoundingClientRect();
+            return {
+                x: e.clientX - rect.left,
+                y: e.clientY - rect.top
+            };
+        }
+
+        function startDraw(e) {
+            isDrawing = true;
+            hasDrawn = true;
+            document.getElementById('canvasHint').classList.add('hidden');
+            const pos = getPos(e);
+            currentPath = [{ x: pos.x, y: pos.y, color: currentTool === 'eraser' ? '#1a1a2e' : currentColor, size: brushSize, tool: currentTool }];
+            ctx.beginPath();
+            ctx.moveTo(pos.x, pos.y);
+        }
+
+        function draw(e) {
+            if (!isDrawing) return;
+            const pos = getPos(e);
+            currentPath.push({ x: pos.x, y: pos.y });
+            
+            ctx.strokeStyle = currentTool === 'eraser' ? '#1a1a2e' : currentColor;
+            ctx.lineWidth = currentTool === 'brush' ? brushSize * 2 : brushSize;
+            ctx.lineTo(pos.x, pos.y);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(pos.x, pos.y);
+        }
+
+        function endDraw() {
+            if (isDrawing && currentPath.length > 0) {
+                paths.push([...currentPath]);
+            }
+            isDrawing = false;
+            currentPath = [];
+        }
+
+        window.setTool = function(tool) {
+            currentTool = tool;
+            document.querySelectorAll('.tools-row .tool-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(tool + 'Tool').classList.add('active');
+        };
+
+        function selectColor(color, el) {
+            currentColor = color;
+            document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('active'));
+            el.classList.add('active');
+        }
+
+        window.updateBrushSize = function() {
+            brushSize = parseInt(document.getElementById('brushSize').value);
+            document.getElementById('brushSizeVal').textContent = brushSize + 'px';
+        };
+
+        window.clearCanvas = function() {
+            ctx.fillStyle = '#1a1a2e';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            paths = [];
+            hasDrawn = false;
+            document.getElementById('canvasHint').classList.remove('hidden');
+            resetResults();
+        };
+
+        window.undoLast = function() {
+            if (paths.length === 0) return;
+            paths.pop();
+            ctx.fillStyle = '#1a1a2e';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            paths.forEach(path => {
+                if (path.length < 2) return;
+                ctx.beginPath();
+                ctx.strokeStyle = path[0].color;
+                ctx.lineWidth = path[0].tool === 'brush' ? path[0].size * 2 : path[0].size;
+                ctx.moveTo(path[0].x, path[0].y);
+                path.forEach(p => ctx.lineTo(p.x, p.y));
+                ctx.stroke();
+            });
+            
+            hasDrawn = paths.length > 0;
+            if (!hasDrawn) document.getElementById('canvasHint').classList.remove('hidden');
+        };
+
+        function resetResults() {
+            selectedResult = null;
+            generatedCanvases = {};
+            document.getElementById('actionsRow').style.display = 'none';
+            document.getElementById('downloadBtn').disabled = true;
+            document.getElementById('statusArea').innerHTML = '';
+            document.getElementById('analysisArea').innerHTML = '';
+            
+            let html = '';
+            ART_STYLES.forEach(s => {
+                html += `
+                <div class="result-card">
+                    <div class="result-image placeholder">
+                        <span class="icon">${s.icon}</span>
+                        <span class="text">${s.name}<br><small>Draw to generate</small></span>
+                    </div>
+                </div>`;
+            });
+            document.getElementById('resultsGrid').innerHTML = html;
+        }
+
+        // ===== MAIN GENERATION =====
+        window.generateImages = async function() {
+            if (!hasDrawn) {
+                toast('Please draw something first!', 'error');
+                return;
+            }
+            
+            if (isProcessing) return;
+            isProcessing = true;
+            
+            const btn = document.getElementById('generateBtn');
+            btn.innerHTML = '<div class="spinner"></div> AI is analyzing your sketch...';
+            btn.disabled = true;
+            btn.classList.add('processing');
+            
+            showStatus('info', '🔍 Analyzing your sketch...');
+            
+            const drawingData = canvas.toDataURL('image/png');
+            const userDesc = document.getElementById('userDescription').value.trim();
+            
+            try {
+                // Step 1: Analyze the drawing with Claude
+                const analysis = await analyzeDrawing(drawingData, userDesc);
+                lastAnalysis = analysis;
+                
+                showStatus('success', '✨ Analysis complete! Generating art...');
+                showAnalysis(analysis);
+                
+                // Step 2: Generate procedural art for each style
+                await generateAllStyles(analysis, drawingData);
+                
+                showStatus('success', '🎉 All art generated! Click to select.');
+                document.getElementById('actionsRow').style.display = 'flex';
+                
+            } catch (error) {
+                console.error('Generation error:', error);
+                showStatus('error', '❌ ' + (error.message || 'Generation failed. Please try again.'));
+            }
+            
+            isProcessing = false;
+            btn.innerHTML = '<span class="icon">🤖</span> Generate Cool Art from My Sketch';
+            btn.disabled = false;
+            btn.classList.remove('processing');
+        };
+
+        async function analyzeDrawing(imageData, userDescription) {
+            const response = await fetch('https://api.anthropic.com/v1/messages', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    model: 'claude-sonnet-4-20250514',
+                    max_tokens: 1000,
+                    messages: [{
+                        role: 'user',
+                        content: [
+                            {
+                                type: 'image',
+                                source: { type: 'base64', media_type: 'image/png', data: imageData.split(',')[1] }
+                            },
+                            {
+                                type: 'text',
+                                text: `Analyze this sketch drawing. I need to procedurally generate artistic variations.
+
+${userDescription ? `User says: "${userDescription}"` : 'No description provided.'}
+
+Respond ONLY with JSON (no markdown):
+{
+  "subject": "main subject (house, tree, flower, animal, landscape, etc)",
+  "subjectType": "building|nature|animal|person|object|abstract|landscape",
+  "elements": ["list of distinct elements like roof, chimney, trunk, leaves, petals"],
+  "colors": {
+    "primary": "#hexcolor based on dominant drawing color or appropriate for subject",
+    "secondary": "#hexcolor for accent",
+    "background": "#hexcolor for sky/ground/ambient"
+  },
+  "mood": "cozy|magical|serene|energetic|mysterious|peaceful|vibrant",
+  "details": "brief description of what you see",
+  "imagePrompt": "a creative prompt describing the ideal artistic version"
+}
+
+Be generous - if it looks vaguely like a house, describe it as a charming house. Help the user!`
+                            }
+                        ]
+                    }]
+                })
+            });
+
+            const data = await response.json();
+            const text = data.content?.[0]?.text || '';
+            
+            try {
+                const cleaned = text.replace(/```json|```/g, '').trim();
+                return JSON.parse(cleaned);
+            } catch {
+                return {
+                    subject: userDescription || 'artistic creation',
+                    subjectType: 'abstract',
+                    elements: ['shapes', 'lines'],
+                    colors: { primary: '#4a90d9', secondary: '#f5a623', background: '#1a1a2e' },
+                    mood: 'creative',
+                    details: 'hand-drawn sketch with personal style',
+                    imagePrompt: userDescription || 'beautiful artistic creation'
+                };
+            }
+        }
+
+        async function generateAllStyles(analysis, originalDrawing) {
+            const grid = document.getElementById('resultsGrid');
+            
+            // Create loading cards with canvases
+            let html = '';
+            ART_STYLES.forEach(s => {
+                html += `
+                <div class="result-card generating" id="card-${s.id}" onclick="selectResult('${s.id}')">
+                    <div class="result-image" id="img-${s.id}">
+                        <canvas id="canvas-${s.id}"></canvas>
+                        <div class="result-loading"><div class="spinner"></div></div>
+                        <div class="result-overlay">
+                            <div class="result-style">${s.icon} ${s.name}</div>
+                            <div class="result-desc">${s.desc}</div>
+                        </div>
+                        <div class="result-badge" style="background:${s.badgeColor}">${s.badge}</div>
+                    </div>
+                </div>`;
+            });
+            grid.innerHTML = html;
+            
+            // Load original drawing as image
+            const sourceImg = new Image();
+            sourceImg.src = originalDrawing;
+            await new Promise(resolve => sourceImg.onload = resolve);
+            
+            // Generate each style
+            for (let i = 0; i < ART_STYLES.length; i++) {
+                const style = ART_STYLES[i];
+                
+                await new Promise(resolve => setTimeout(resolve, 300));
+                
+                const artCanvas = document.getElementById('canvas-' + style.id);
+                const container = document.getElementById('img-' + style.id);
+                
+                // Set canvas size
+                artCanvas.width = container.offsetWidth * 2;
+                artCanvas.height = container.offsetHeight * 2;
+                const artCtx = artCanvas.getContext('2d');
+                
+                // Generate the art
+                await style.generate(artCtx, sourceImg, analysis, artCanvas.width, artCanvas.height);
+                
+                // Store reference
+                generatedCanvases[style.id] = artCanvas;
+                
+                // Remove loading
+                const card = document.getElementById('card-' + style.id);
+                card.classList.remove('generating');
+                const loading = card.querySelector('.result-loading');
+                if (loading) loading.remove();
+            }
+        }
+
+        // ===== PROCEDURAL ART GENERATORS =====
+
+        // Helper: Extract edges from source
+        function getEdges(sourceImg, w, h) {
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = w;
+            tempCanvas.height = h;
+            const tempCtx = tempCanvas.getContext('2d');
+            tempCtx.drawImage(sourceImg, 0, 0, w, h);
+            const imgData = tempCtx.getImageData(0, 0, w, h);
+            const data = imgData.data;
+            
+            const edges = [];
+            const threshold = 50;
+            
+            for (let y = 1; y < h - 1; y++) {
+                for (let x = 1; x < w - 1; x++) {
+                    const idx = (y * w + x) * 4;
+                    const brightness = (data[idx] + data[idx+1] + data[idx+2]) / 3;
+                    
+                    // Simple edge detection
+                    const idxRight = (y * w + x + 1) * 4;
+                    const idxDown = ((y + 1) * w + x) * 4;
+                    const brightRight = (data[idxRight] + data[idxRight+1] + data[idxRight+2]) / 3;
+                    const brightDown = (data[idxDown] + data[idxDown+1] + data[idxDown+2]) / 3;
+                    
+                    if (Math.abs(brightness - brightRight) > threshold || Math.abs(brightness - brightDown) > threshold) {
+                        edges.push({ x, y, brightness, color: `rgb(${data[idx]},${data[idx+1]},${data[idx+2]})` });
+                    }
+                }
+            }
+            return edges;
+        }
+
+        // Helper: Get colors from source
+        function getSourceColors(sourceImg, w, h) {
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = w;
+            tempCanvas.height = h;
+            const tempCtx = tempCanvas.getContext('2d');
+            tempCtx.drawImage(sourceImg, 0, 0, w, h);
+            const imgData = tempCtx.getImageData(0, 0, w, h);
+            const data = imgData.data;
+            
+            const colors = [];
+            const step = 20;
+            for (let y = 0; y < h; y += step) {
+                for (let x = 0; x < w; x += step) {
+                    const idx = (y * w + x) * 4;
+                    if (data[idx+3] > 50) { // Not transparent
+                        const brightness = (data[idx] + data[idx+1] + data[idx+2]) / 3;
+                        if (brightness > 30 && brightness < 230) { // Not background
+                            colors.push({ r: data[idx], g: data[idx+1], b: data[idx+2], x, y });
+                        }
+                    }
+                }
+            }
+            return colors;
+        }
+
+        // STYLE 1: Digital Painting
+        async function generateDigitalPainting(ctx, sourceImg, analysis, w, h) {
+            const bgColor = analysis.colors?.background || '#1a3a5c';
+            const primaryColor = analysis.colors?.primary || '#4a90d9';
+            const secondaryColor = analysis.colors?.secondary || '#f5a623';
+            
+            // Rich gradient background
+            const grad = ctx.createRadialGradient(w/2, h/2, 0, w/2, h/2, w*0.7);
+            grad.addColorStop(0, lightenColor(bgColor, 20));
+            grad.addColorStop(0.5, bgColor);
+            grad.addColorStop(1, darkenColor(bgColor, 30));
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, w, h);
+            
+            // Add atmospheric glow
+            ctx.globalAlpha = 0.3;
+            ctx.fillStyle = primaryColor;
+            ctx.beginPath();
+            ctx.arc(w * 0.3, h * 0.3, w * 0.4, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.globalAlpha = 1;
+            
+            const edges = getEdges(sourceImg, w, h);
+            const colors = getSourceColors(sourceImg, w, h);
+            
+            // Paint thick strokes following the drawing
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            
+            // Layer 1: Base fill areas with painterly strokes
+            for (let i = 0; i < 200; i++) {
+                const edge = edges[Math.floor(Math.random() * edges.length)];
+                if (!edge) continue;
+                
+                const colorChoice = colors[Math.floor(Math.random() * colors.length)] || { r: 100, g: 150, b: 200 };
+                const strokeColor = `rgba(${colorChoice.r + randInt(-30, 30)}, ${colorChoice.g + randInt(-30, 30)}, ${colorChoice.b + randInt(-30, 30)}, 0.7)`;
+                
+                ctx.strokeStyle = strokeColor;
+                ctx.lineWidth = randInt(15, 40);
+                ctx.beginPath();
+                ctx.moveTo(edge.x + randInt(-30, 30), edge.y + randInt(-30, 30));
+                
+                // Painterly curve
+                const cp1x = edge.x + randInt(-50, 50);
+                const cp1y = edge.y + randInt(-50, 50);
+                const endX = edge.x + randInt(-60, 60);
+                const endY = edge.y + randInt(-60, 60);
+                ctx.quadraticCurveTo(cp1x, cp1y, endX, endY);
+                ctx.stroke();
+            }
+            
+            // Layer 2: Detail strokes
+            for (let i = 0; i < 150; i++) {
+                const edge = edges[Math.floor(Math.random() * edges.length)];
+                if (!edge) continue;
+                
+                ctx.strokeStyle = shiftHue(primaryColor, randInt(-30, 30));
+                ctx.globalAlpha = 0.6;
+                ctx.lineWidth = randInt(5, 15);
+                ctx.beginPath();
+                ctx.moveTo(edge.x, edge.y);
+                ctx.lineTo(edge.x + randInt(-40, 40), edge.y + randInt(-40, 40));
+                ctx.stroke();
+            }
+            
+            // Layer 3: Highlights
+            ctx.globalAlpha = 0.4;
+            for (let i = 0; i < 50; i++) {
+                const x = randInt(0, w);
+                const y = randInt(0, h * 0.5);
+                ctx.fillStyle = '#ffffff';
+                ctx.beginPath();
+                ctx.arc(x, y, randInt(5, 20), 0, Math.PI * 2);
+                ctx.fill();
+            }
+            
+            ctx.globalAlpha = 1;
+            
+            // Add subtle vignette
+            const vignette = ctx.createRadialGradient(w/2, h/2, w*0.3, w/2, h/2, w*0.8);
+            vignette.addColorStop(0, 'rgba(0,0,0,0)');
+            vignette.addColorStop(1, 'rgba(0,0,0,0.4)');
+            ctx.fillStyle = vignette;
+            ctx.fillRect(0, 0, w, h);
+        }
+
+        // STYLE 2: Fantasy Render
+        async function generateFantasyRender(ctx, sourceImg, analysis, w, h) {
+            const bgColor = '#0f0a1e';
+            const primaryColor = analysis.colors?.primary || '#9b59b6';
+            const glowColor = '#00ffff';
+            const magicColor = '#ff00ff';
+            
+            // Dark mystical background
+            const grad = ctx.createLinearGradient(0, 0, 0, h);
+            grad.addColorStop(0, '#1a0a2e');
+            grad.addColorStop(0.5, '#0f0a1e');
+            grad.addColorStop(1, '#050510');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, w, h);
+            
+            // Add starfield
+            for (let i = 0; i < 100; i++) {
+                const x = randInt(0, w);
+                const y = randInt(0, h);
+                const size = Math.random() * 2;
+                ctx.fillStyle = `rgba(255,255,255,${Math.random() * 0.8})`;
+                ctx.beginPath();
+                ctx.arc(x, y, size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            
+            const edges = getEdges(sourceImg, w, h);
+            
+            // Ethereal glow layer
+            ctx.shadowBlur = 30;
+            ctx.shadowColor = glowColor;
+            ctx.globalAlpha = 0.3;
+            
+            for (let i = 0; i < 100; i++) {
+                const edge = edges[Math.floor(Math.random() * edges.length)];
+                if (!edge) continue;
+                
+                ctx.fillStyle = glowColor;
+                ctx.beginPath();
+                ctx.arc(edge.x, edge.y, randInt(10, 30), 0, Math.PI * 2);
+                ctx.fill();
+            }
+            
+            // Magic particles
+            ctx.shadowColor = magicColor;
+            ctx.globalAlpha = 0.5;
+            
+            for (let i = 0; i < 80; i++) {
+                const edge = edges[Math.floor(Math.random() * edges.length)];
+                if (!edge) continue;
+                
+                ctx.fillStyle = i % 2 === 0 ? magicColor : glowColor;
+                ctx.beginPath();
+                ctx.arc(edge.x + randInt(-20, 20), edge.y + randInt(-20, 20), randInt(3, 10), 0, Math.PI * 2);
+                ctx.fill();
+            }
+            
+            ctx.shadowBlur = 0;
+            ctx.globalAlpha = 1;
+            
+            // Draw ethereal outline
+            ctx.strokeStyle = primaryColor;
+            ctx.lineWidth = 3;
+            ctx.shadowBlur = 15;
+            ctx.shadowColor = primaryColor;
+            
+            edges.forEach((edge, i) => {
+                if (i % 3 === 0) {
+                    ctx.beginPath();
+                    ctx.arc(edge.x, edge.y, 2, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            });
+            
+            // Add magic swirls
+            ctx.shadowBlur = 20;
+            for (let s = 0; s < 5; s++) {
+                const centerX = randInt(w * 0.2, w * 0.8);
+                const centerY = randInt(h * 0.2, h * 0.8);
+                
+                ctx.strokeStyle = s % 2 === 0 ? glowColor : magicColor;
+                ctx.lineWidth = 2;
+                ctx.globalAlpha = 0.4;
+                ctx.beginPath();
+                
+                for (let a = 0; a < Math.PI * 4; a += 0.1) {
+                    const r = a * 10;
+                    const x = centerX + Math.cos(a) * r;
+                    const y = centerY + Math.sin(a) * r;
+                    if (a === 0) ctx.moveTo(x, y);
+                    else ctx.lineTo(x, y);
+                }
+                ctx.stroke();
+            }
+            
+            ctx.shadowBlur = 0;
+            ctx.globalAlpha = 1;
+        }
+
+        // STYLE 3: Impressionist
+        async function generateImpressionist(ctx, sourceImg, analysis, w, h) {
+            const bgColor = analysis.colors?.background || '#87ceeb';
+            const primaryColor = analysis.colors?.primary || '#228b22';
+            const secondaryColor = analysis.colors?.secondary || '#ffd700';
+            
+            // Soft sky gradient
+            const grad = ctx.createLinearGradient(0, 0, 0, h);
+            grad.addColorStop(0, '#87ceeb');
+            grad.addColorStop(0.4, '#b8d4e8');
+            grad.addColorStop(0.7, '#f5e6d3');
+            grad.addColorStop(1, '#d4a574');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, w, h);
+            
+            const edges = getEdges(sourceImg, w, h);
+            const colors = getSourceColors(sourceImg, w, h);
+            
+            // Impressionist base - many small dabs
+            for (let i = 0; i < 500; i++) {
+                const edge = edges[Math.floor(Math.random() * edges.length)];
+                if (!edge) continue;
+                
+                const colorSrc = colors[Math.floor(Math.random() * colors.length)] || { r: 100, g: 150, b: 100 };
+                const dabColor = `rgb(${clamp(colorSrc.r + randInt(-40, 40), 0, 255)}, ${clamp(colorSrc.g + randInt(-40, 40), 0, 255)}, ${clamp(colorSrc.b + randInt(-40, 40), 0, 255)})`;
+                
+                ctx.fillStyle = dabColor;
+                ctx.globalAlpha = 0.7;
+                
+                // Elongated brush dab
+                ctx.save();
+                ctx.translate(edge.x + randInt(-15, 15), edge.y + randInt(-15, 15));
+                ctx.rotate(Math.random() * Math.PI);
+                ctx.beginPath();
+                ctx.ellipse(0, 0, randInt(8, 20), randInt(3, 8), 0, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            }
+            
+            // Add characteristic thick strokes
+            ctx.lineCap = 'round';
+            for (let i = 0; i < 100; i++) {
+                const edge = edges[Math.floor(Math.random() * edges.length)];
+                if (!edge) continue;
+                
+                const colorSrc = colors[Math.floor(Math.random() * colors.length)] || { r: 100, g: 100, b: 150 };
+                ctx.strokeStyle = `rgb(${colorSrc.r}, ${colorSrc.g}, ${colorSrc.b})`;
+                ctx.lineWidth = randInt(4, 12);
+                ctx.globalAlpha = 0.8;
+                
+                ctx.beginPath();
+                ctx.moveTo(edge.x, edge.y);
+                ctx.lineTo(edge.x + randInt(-30, 30), edge.y + randInt(-30, 30));
+                ctx.stroke();
+            }
+            
+            // Sunlight dapples
+            ctx.globalAlpha = 0.3;
+            for (let i = 0; i < 30; i++) {
+                ctx.fillStyle = '#fffacd';
+                ctx.beginPath();
+                ctx.arc(randInt(0, w), randInt(0, h * 0.6), randInt(10, 40), 0, Math.PI * 2);
+                ctx.fill();
+            }
+            
+            ctx.globalAlpha = 1;
+        }
+
+        // STYLE 4: Neon Cyberpunk
+        async function generateNeonCyberpunk(ctx, sourceImg, analysis, w, h) {
+            // Dark city background
+            ctx.fillStyle = '#0a0a0f';
+            ctx.fillRect(0, 0, w, h);
+            
+            // Grid lines
+            ctx.strokeStyle = 'rgba(0, 255, 255, 0.1)';
+            ctx.lineWidth = 1;
+            for (let x = 0; x < w; x += 40) {
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, h);
+                ctx.stroke();
+            }
+            for (let y = 0; y < h; y += 40) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(w, y);
+                ctx.stroke();
+            }
+            
+            const edges = getEdges(sourceImg, w, h);
+            const neonColors = ['#00ffff', '#ff00ff', '#ffff00', '#00ff00', '#ff0066'];
+            
+            // Neon glow outline
+            ctx.shadowBlur = 20;
+            
+            for (let pass = 0; pass < 3; pass++) {
+                const neonColor = neonColors[pass % neonColors.length];
+                ctx.shadowColor = neonColor;
+                ctx.strokeStyle = neonColor;
+                ctx.lineWidth = 4 - pass;
+                ctx.globalAlpha = 0.8 - pass * 0.2;
+                
+                ctx.beginPath();
+                edges.forEach((edge, i) => {
+                    if (i === 0) ctx.moveTo(edge.x, edge.y);
+                    else if (i % 2 === 0) ctx.lineTo(edge.x, edge.y);
+                });
+                ctx.stroke();
+            }
+            
+            // Glitch effect lines
+            ctx.globalAlpha = 0.6;
+            for (let i = 0; i < 20; i++) {
+                const y = randInt(0, h);
+                const glitchWidth = randInt(50, 200);
+                const glitchHeight = randInt(2, 8);
+                
+                ctx.fillStyle = neonColors[randInt(0, neonColors.length - 1)];
+                ctx.fillRect(randInt(0, w - glitchWidth), y, glitchWidth, glitchHeight);
+            }
+            
+            // Neon particles
+            ctx.shadowBlur = 15;
+            for (let i = 0; i < 100; i++) {
+                const edge = edges[Math.floor(Math.random() * edges.length)];
+                if (!edge) continue;
+                
+                const color = neonColors[randInt(0, neonColors.length - 1)];
+                ctx.shadowColor = color;
+                ctx.fillStyle = color;
+                ctx.globalAlpha = 0.8;
+                
+                ctx.beginPath();
+                ctx.arc(edge.x + randInt(-10, 10), edge.y + randInt(-10, 10), randInt(2, 6), 0, Math.PI * 2);
+                ctx.fill();
+            }
+            
+            // Scanlines
+            ctx.shadowBlur = 0;
+            ctx.globalAlpha = 0.05;
+            ctx.fillStyle = '#000000';
+            for (let y = 0; y < h; y += 4) {
+                ctx.fillRect(0, y, w, 2);
+            }
+            
+            ctx.globalAlpha = 1;
+            
+            // CRT vignette
+            const vignette = ctx.createRadialGradient(w/2, h/2, w*0.2, w/2, h/2, w*0.7);
+            vignette.addColorStop(0, 'rgba(0,0,0,0)');
+            vignette.addColorStop(1, 'rgba(0,0,0,0.6)');
+            ctx.fillStyle = vignette;
+            ctx.fillRect(0, 0, w, h);
+        }
+
+        // ===== HELPER FUNCTIONS =====
+        function randInt(min, max) {
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+        function clamp(val, min, max) {
+            return Math.max(min, Math.min(max, val));
+        }
+
+        function lightenColor(hex, percent) {
+            const num = parseInt(hex.replace('#', ''), 16);
+            const r = clamp(((num >> 16) & 255) + percent, 0, 255);
+            const g = clamp(((num >> 8) & 255) + percent, 0, 255);
+            const b = clamp((num & 255) + percent, 0, 255);
+            return `rgb(${r},${g},${b})`;
+        }
+
+        function darkenColor(hex, percent) {
+            return lightenColor(hex, -percent);
+        }
+
+        function shiftHue(hex, shift) {
+            const num = parseInt(hex.replace('#', ''), 16);
+            let r = (num >> 16) & 255;
+            let g = (num >> 8) & 255;
+            let b = num & 255;
+            r = clamp(r + shift, 0, 255);
+            g = clamp(g + Math.floor(shift * 0.5), 0, 255);
+            b = clamp(b - Math.floor(shift * 0.3), 0, 255);
+            return `rgb(${r},${g},${b})`;
+        }
+
+        // ===== UI FUNCTIONS =====
+        window.selectResult = function(id) {
+            selectedResult = id;
+            document.querySelectorAll('.result-card').forEach(card => {
+                card.classList.toggle('selected', card.id === 'card-' + id);
+            });
+            document.getElementById('downloadBtn').disabled = false;
+            const style = ART_STYLES.find(s => s.id === id);
+            toast('Selected: ' + style.name);
+        };
+
+        window.regenerate = function() {
+            if (hasDrawn) generateImages();
+        };
+
+        window.downloadSelected = function() {
+            if (!selectedResult || !generatedCanvases[selectedResult]) {
+                toast('Please select an image first', 'error');
+                return;
+            }
+            
+            const canvas = generatedCanvases[selectedResult];
+            const link = document.createElement('a');
+            link.download = `chameleon-${selectedResult}-${Date.now()}.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+            toast('Downloaded!');
+        };
+
+        window.downloadAll = function() {
+            Object.keys(generatedCanvases).forEach((id, i) => {
+                setTimeout(() => {
+                    const canvas = generatedCanvases[id];
+                    const link = document.createElement('a');
+                    link.download = `chameleon-${id}-${Date.now()}.png`;
+                    link.href = canvas.toDataURL('image/png');
+                    link.click();
+                }, i * 500);
+            });
+            toast('Downloading all images...');
+        };
+
+        function showStatus(type, message) {
+            const icons = { info: '💭', success: '✅', error: '❌' };
+            document.getElementById('statusArea').innerHTML = `
+                <div class="status-msg ${type}">
+                    <span class="icon">${icons[type]}</span>
+                    <span>${message}</span>
+                </div>
+            `;
+        }
+
+        function showAnalysis(analysis) {
+            document.getElementById('analysisArea').innerHTML = `
+                <div class="ai-analysis">
+                    <div class="ai-analysis-header">
+                        <span class="icon">🤖</span>
+                        <span class="text">AI Analysis</span>
+                    </div>
+                    <div class="ai-analysis-content">
+                        <strong>I see:</strong> ${analysis.subject}<br>
+                        <strong>Details:</strong> ${analysis.details}<br>
+                        <strong>Mood:</strong> ${analysis.mood}<br>
+                        <strong>Creating:</strong> "${analysis.imagePrompt}"
+                    </div>
+                </div>
+            `;
+        }
+
+        window.openRequestModal = function() {
+            document.getElementById('requestModal').classList.add('open');
+        };
+
+        window.closeRequestModal = function() {
+            document.getElementById('requestModal').classList.remove('open');
+        };
+
+        window.submitRequest = function() {
+            const email = document.getElementById('requestEmail').value;
+            const details = document.getElementById('requestDetails').value;
+            
+            if (!email || !email.includes('@')) {
+                toast('Please enter a valid email', 'error');
+                return;
+            }
+            
+            const subject = encodeURIComponent(CONFIG.productName + ' - Custom Image Request');
+            const body = encodeURIComponent(`Customer Email: ${email}\n\nRequest Details:\n${details}\n\n---\nSent from ${CONFIG.productName}`);
+            
+            window.location.href = `mailto:${CONFIG.contactEmail}?subject=${subject}&body=${body}`;
+            toast('Request sent! Check your email.');
+            closeRequestModal();
+        };
+
+        window.toast = function(msg, type = 'success') {
+            const t = document.getElementById('toastEl');
+            t.textContent = msg;
+            t.className = 'toast' + (type === 'error' ? ' error' : '');
+            t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 3000);
+        };
+
+        let resizeTimeout;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(() => {
+                if (!hasDrawn) initCanvas();
+            }, 250);
+        });
+
+        window.addEventListener('keydown', e => {
+            if (e.key === 'Escape') closeRequestModal();
+        });
+    </script>
+</body>
+</html>
