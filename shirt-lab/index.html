@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Chameleon Studios Shirt Lab</title>
+<style>
+:root{--bg:#f5f4f0;--panel:#ffffff;--ink:#1d2321;--muted:#5f6b66;--line:#d9dcd6;--accent:#2f7d6d;--accent2:#c9822b;--chip:#eef1ec}
+[data-theme=dark]{--bg:#121615;--panel:#1b2120;--ink:#e7ece9;--muted:#9aa7a1;--line:#2c3533;--accent:#4fb39c;--accent2:#e0a24f;--chip:#232b29}
+*{box-sizing:border-box}
+body{margin:0;font-family:Calibri,Arial,Helvetica,sans-serif;background:var(--bg);color:var(--ink);font-size:15px}
+header{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);background:var(--panel);position:sticky;top:0;z-index:5;flex-wrap:wrap}
+header h1{font-family:Cambria,Georgia,serif;font-size:20px;margin:0;flex:1;min-width:200px}
+nav button,.btn{border:1px solid var(--line);background:var(--chip);color:var(--ink);padding:8px 12px;border-radius:8px;cursor:pointer;font:inherit}
+nav button.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+.btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+main{padding:16px;max-width:1300px;margin:0 auto}
+section{display:none}section.on{display:block}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:14px}
+.muted{color:var(--muted);font-size:13px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+label.f{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--muted);min-width:140px}
+input[type=range]{width:100%}
+select,input[type=text],input[type=number]{background:var(--chip);color:var(--ink);border:1px solid var(--line);border-radius:6px;padding:6px;font:inherit}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px}
+.tile{background:var(--chip);border:1px solid var(--line);border-radius:10px;overflow:hidden;position:relative}
+.tile img{width:100%;height:130px;object-fit:cover;display:block;cursor:pointer}
+.tile .meta{padding:6px 8px;font-size:12px}
+.tile .star{position:absolute;top:6px;right:6px;background:rgba(0,0,0,.55);color:#fff;border:0;border-radius:50%;width:30px;height:30px;cursor:pointer;font-size:16px}
+.tile .star.on{color:#ffcc33}
+.bar{height:5px;background:var(--line);border-radius:3px;overflow:hidden;margin-top:3px}.bar i{display:block;height:100%;background:var(--accent)}
+.flag{display:inline-block;font-size:11px;padding:1px 6px;border-radius:10px;background:var(--accent2);color:#fff;margin-top:3px}
+.studio{display:grid;grid-template-columns:minmax(280px,380px) 1fr;gap:14px}
+@media(max-width:800px){.studio{grid-template-columns:1fr}}
+.mock{position:relative;width:100%;max-width:560px;margin:0 auto;aspect-ratio:1/1.05}
+.mock svg{position:absolute;inset:0;width:100%;height:100%}
+.mock canvas{position:absolute;left:26%;top:17%;width:48%;height:auto}
+.sw{display:flex;gap:6px;flex-wrap:wrap}
+.swc{display:flex;flex-direction:column;align-items:center;gap:3px}.swc button{font-size:11px;padding:2px 6px;border-radius:6px;border:1px solid var(--line);background:var(--chip);color:var(--ink);cursor:pointer}.swc button.ko{background:var(--accent2);color:#fff;border-color:var(--accent2)}
+.sw input[type=color]{width:38px;height:32px;border:1px solid var(--line);border-radius:6px;padding:0;background:none}
+.syms{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
+.sym svg{width:100%;height:170px;color:var(--ink);background:var(--chip);border-radius:10px}
+.sym h3{font-family:Cambria,Georgia,serif;margin:8px 0 4px;font-size:17px}
+.sym p{margin:0 0 8px;font-size:13px;color:var(--muted)}
+progress{width:100%}
+h2{font-family:Cambria,Georgia,serif;margin:0 0 8px;font-size:18px}
+</style>
+</head>
+<body>
+<header>
+  <h1>Chameleon Studios · Shirt Lab</h1>
+  <nav class="row">
+    <button data-tab="sort" class="on">1 · Photo Sorter</button>
+    <button data-tab="studio">2 · Design Studio</button>
+    <button data-tab="symbols">3 · Symbols</button>
+  </nav>
+  <button class="btn" id="theme">◐ Theme</button>
+</header>
+<main>
+
+<!-- SORTER -->
+<section id="sort" class="on">
+  <div class="card">
+    <h2>Find the shirt-worthy shots</h2>
+    <p class="muted">Pick a folder (computer) or a batch of photos (phone). Everything runs on this device and nothing is uploaded. Each photo is scored for sharpness, contrast, color punch and print resolution. For Google Photos, export the trip albums with Google Takeout first, unzip them, then pick that folder here.</p>
+    <div class="row">
+      <label class="btn primary">Pick folder<input id="dirIn" type="file" webkitdirectory multiple hidden></label>
+      <label class="btn">Pick photos<input id="filesIn" type="file" accept="image/*" multiple hidden></label>
+      <label class="f">Show<select id="showN"><option value="40">Top 40</option><option value="100">Top 100</option><option value="9999">All</option><option value="fav">Starred only</option></select></label>
+      <label class="f">Sort by<select id="sortBy"><option value="score">Shirt score</option><option value="sharp">Sharpness</option><option value="color">Color punch</option><option value="contrast">Contrast</option></select></label>
+      <label class="f" style="min-width:120px"><span><input type="checkbox" id="hideLow"> Hide low-res</span></label>
+    </div>
+    <progress id="prog" value="0" max="1" hidden></progress>
+    <div id="sortStat" class="muted"></div>
+  </div>
+  <div id="grid" class="grid"></div>
+</section>
+
+<!-- STUDIO -->
+<section id="studio">
+  <div class="studio">
+    <div>
+      <div class="card">
+        <h2>Source</h2>
+        <div class="row"><label class="btn primary">Load photo<input id="photoIn" type="file" accept="image/*" hidden></label><span id="srcInfo" class="muted">No photo yet</span></div>
+      </div>
+      <div class="card">
+        <h2>Art style</h2>
+        <div class="row" style="margin-bottom:8px"><span class="muted">Quick looks:</span><button class="btn" data-look="soft">Soft overlay</button><button class="btn" data-look="bal">Balanced</button><button class="btn" data-look="bold">Bold print</button><button class="btn" data-look="ghost">Negative ghost</button></div>
+        <label class="f">Colors: <b id="kV">4</b><input id="k" type="range" min="2" max="8" value="4"></label>
+        <label class="f">Smoothing (fewer specks): <b id="blurV">2</b><input id="blur" type="range" min="0" max="8" value="2"></label>
+        <label class="f">Blend with shirt (auto knock-out of colors near the shirt color): <b id="blendV">0</b><input id="blend" type="range" min="0" max="140" value="0"></label>
+        <label class="f"><span><input type="checkbox" id="neg"> Negative (flip light and dark)</span></label>
+        <label class="f">Edge<select id="edge"><option value="hard">Hard edge</option><option value="dissolve" selected>Dissolve edges into shirt</option><option value="fadeT">Fade out top (sky into shirt)</option><option value="fadeB">Fade out bottom</option><option value="fadeTB">Fade top and bottom</option></select></label>
+        <label class="f">Dissolve depth: <b id="edgeDV">12</b>%<input id="edgeD" type="range" min="2" max="45" value="12"></label>
+        <label class="f">Grain size<select id="grain"><option value="3">Fine</option><option value="6" selected>Medium</option><option value="12">Coarse</option></select></label>
+        <div class="row"><button class="btn" id="repal">Re-pick palette from photo</button></div>
+        <p class="muted">Palette, darkest first. Tap a color to change it. Tap <b>Out</b> to knock that color out so the shirt shows through (sky, background trees, anything).</p>
+        <div id="pal" class="sw"></div>
+        <p id="cov" class="muted" style="margin-top:8px"></p>
+      </div>
+      <div class="card">
+        <h2>Shape &amp; crop</h2>
+        <label class="f">Shape<select id="shape"><option value="rect">Photo rectangle</option><option value="square">Square</option><option value="circle">Circle</option><option value="tri">Mountain triangle</option><option value="arch">Arch</option><option value="hex">Badge hexagon</option></select></label>
+        <label class="f">Zoom<input id="zoom" type="range" min="100" max="300" value="100"></label>
+        <label class="f">Pan left/right<input id="panX" type="range" min="0" max="100" value="50"></label>
+        <label class="f">Pan up/down<input id="panY" type="range" min="0" max="100" value="50"></label>
+        <label class="f">Art width on shirt<input id="artW" type="range" min="40" max="100" value="80"></label>
+      </div>
+      <div class="card">
+        <h2>Text &amp; symbol</h2>
+        <label class="f">Text line<input id="txt" type="text" placeholder="e.g. MOGOLLON RIM · 2026"></label>
+        <div class="row">
+          <label class="f">Font<select id="font"><option>Cambria</option><option>Georgia</option><option>Arial Black</option><option>Trebuchet MS</option><option>Courier New</option></select></label>
+          <label class="f">Size<input id="txtS" type="range" min="80" max="400" value="200"></label>
+        </div>
+        <div class="row"><label class="f">Text color<select id="txtC"></select></label><input type="color" id="txtX" value="#f2efe6" title="Custom text color"></div>
+        <label class="f">Symbol<select id="symSel"><option value="">None</option></select></label>
+        <label class="f">Symbol spot<select id="symPos"><option value="below">Below text</option><option value="corner">Art corner</option><option value="center">Center of art</option></select></label>
+        <label class="f">Symbol size<input id="symS" type="range" min="200" max="1400" value="500"></label>
+        <div class="row"><label class="f">Symbol color<select id="symC"><option value="text">Same as text</option></select></label><input type="color" id="symX" value="#e0a24f" title="Custom symbol color"></div>
+        <label class="f">Symbol line weight<input id="symW" type="range" min="15" max="70" value="32"></label>
+      </div>
+    </div>
+    <div>
+      <div class="card">
+        <div class="row" style="justify-content:space-between">
+          <h2>Preview</h2>
+          <div class="row">
+            <label class="f" style="min-width:110px">Shirt<select id="shirt"><option value="#1f1f1f">Black</option><option value="#1e2a44">Navy</option><option value="#2f4a3a">Forest</option><option value="#4a4f55">Heather gray</option><option value="#d8cbb0">Sand</option><option value="#f4f4f2">White</option><option value="#6b2a33">Maroon</option><option value="#5b5f3a">Olive</option><option value="#7f9bb3">Dusty blue</option><option value="#9c7f8a">Mauve</option><option value="#efe7d6">Ivory</option><option value="custom">Custom…</option></select></label><input type="color" id="shirtX" value="#3b4a5a" title="Custom shirt color">
+          </div>
+        </div>
+        <div class="mock" id="mock">
+          <svg viewBox="0 0 400 420"><path id="shirtPath" d="M140 20 Q200 55 260 20 L345 55 L395 140 L335 170 L320 145 L322 410 L78 410 L80 145 L65 170 L5 140 L55 55 Z" fill="#1f1f1f" stroke="rgba(128,128,128,.35)" stroke-width="2"/><path d="M140 20 Q200 70 260 20" fill="none" stroke="rgba(128,128,128,.35)" stroke-width="3"/></svg>
+          <canvas id="pv" width="900" height="1080"></canvas>
+        </div>
+        <div class="row" style="justify-content:center;margin-top:10px">
+          <button class="btn primary" id="exp">Export print file (4500 × 5400 PNG)</button>
+          <button class="btn" id="expMock">Export mockup image</button>
+        </div>
+        <p class="muted" id="expStat" style="text-align:center">Print file is transparent, hard-edged (no half-transparent pixels), sized for a full-front print at 300 DPI.</p>
+        <p class="muted" id="resWarn" style="text-align:center;color:var(--accent2)"></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SYMBOLS -->
+<section id="symbols">
+  <div class="card"><h2>Harmonic mark set</h2><p class="muted">Original marks built from real sound math. Each looks like plain geometry until someone knows what it is, and that story goes on the hangtag and in the listing. Download one as SVG (for Inkscape or Etsy banners) or PNG (transparent, 2000 px).</p>
+  <div class="row"><label class="f" style="min-width:120px">Mark color<input type="color" id="symCol" value="#2f7d6d"></label><label class="f" style="min-width:120px">Preview on shirt color<input type="color" id="symBg" value="#eef1ec"></label>
+  <div class="row" id="symPre"></div></div></div>
+  <div id="symGrid" class="syms"></div>
+</section>
+</main>
+
+<script>
+(function(){
+'use strict';
+const $=s=>document.querySelector(s);
+const store={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+
+/* theme */
+const root=document.documentElement;
+root.dataset.theme=store.get('cs_theme','light');
+$('#theme').onclick=()=>{root.dataset.theme=root.dataset.theme==='dark'?'light':'dark';store.set('cs_theme',root.dataset.theme)};
+
+/* tabs */
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('on',x===b));
+  document.querySelectorAll('section').forEach(s=>s.classList.toggle('on',s.id===b.dataset.tab));
+});
+
+/* ---------- SYMBOLS (original, generated from harmonic math) ---------- */
+function lissa(a,b,d,R=38,n=800){let p='';for(let i=0;i<=n;i++){const t=i/n*2*Math.PI;const x=50+R*Math.sin(a*t+d),y=50+R*Math.sin(b*t);p+=(i?'L':'M')+x.toFixed(2)+' '+y.toFixed(2)}return p+'Z'}
+function circ(r,cx=50,cy=50){return `M${cx-r} ${cy}a${r} ${r} 0 1 0 ${2*r} 0a${r} ${r} 0 1 0 ${-2*r} 0`}
+function wave(){let top='',bot='';const n=3;for(let i=0;i<=200;i++){const x=12+76*i/200;const y=16*Math.sin(n*Math.PI*i/200);top+=(i?'L':'M')+x.toFixed(2)+' '+(50-y).toFixed(2);bot+=(i?'L':'M')+x.toFixed(2)+' '+(50+y).toFixed(2)}
+  let dots='';[12,37.33,62.67,88].forEach(x=>dots+=circ(2.2,x,50));return circ(44)+top+bot+dots}
+function ridge(){const h=[1/6,1/4,1/2,1,1/3,1/5];let p='';const base=82,w=11;h.forEach((v,i)=>{const x=17+i*13.5;p+=`M${x} ${base}L${x} ${(base-64*v).toFixed(2)}`;});return p+`M10 ${base}L90 ${base}`}
+function coil(){const b=Math.log(2)/(2*Math.PI);let p='';const turns=2.25,a=7;for(let i=0;i<=400;i++){const th=i/400*turns*2*Math.PI;const r=a*Math.exp(b*th);p+=(i?'L':'M')+(50+r*Math.cos(th)).toFixed(2)+' '+(50+r*Math.sin(th)).toFixed(2)}
+  const R=42;for(let s=0;s<12;s++){const th=s/12*2*Math.PI;p+=`M${(50+R*Math.cos(th)).toFixed(2)} ${(50+R*Math.sin(th)).toFixed(2)}L${(50+(R+5)*Math.cos(th)).toFixed(2)} ${(50+(R+5)*Math.sin(th)).toFixed(2)}`}return p}
+function hum(){let p='';[1,1/2,1/3,1/4,1/5].forEach(v=>p+=circ(44*v));return p+circ(1.6)}
+function fifthPeak(){return 'M50 10L90 82L10 82Z'+lissa(3,2,Math.PI/2).replace(/(\d+\.\d+) (\d+\.\d+)/g,(m,x,y)=>((+x-50)*0.5+50).toFixed(2)+' '+((+y-50)*0.5+60).toFixed(2))}
+
+const F=v=>v.toFixed(2);
+function arrow(x,y,ang,len=7){const a1=ang+Math.PI-0.5,a2=ang+Math.PI+0.5;return `M${F(x+len*Math.cos(a1))} ${F(y+len*Math.sin(a1))}L${F(x)} ${F(y)}L${F(x+len*Math.cos(a2))} ${F(y+len*Math.sin(a2))}`}
+function waveAlong(x0,y0,x1,y1,cyc,amp,ampFn,n=240,move=true){const dx=x1-x0,dy=y1-y0,L=Math.hypot(dx,dy),ux=dx/L,uy=dy/L,px=-uy,py=ux;let p='';
+  for(let i=0;i<=n;i++){const u=i/n;const a=amp*(ampFn?ampFn(u):1);const o=a*Math.sin(2*Math.PI*cyc*u);p+=((i||!move)?'L':'M')+F(x0+dx*u+px*o)+' '+F(y0+dy*u+py*o)}return p}
+function chirp(up){let p='';const n=300;const f0=up?1.2:5,f1=up?5:1.2;const yA=up?66:34,yB=up?34:66;let ex=0,ey=0;
+  for(let i=0;i<=n;i++){const u=i/n;const ph=2*Math.PI*(f0*u+(f1-f0)*u*u/2);const x=10+70*u,y=yA+(yB-yA)*u-12*Math.sin(ph);p+=(i?'L':'M')+F(x)+' '+F(y);ex=x;ey=y}
+  const ang=Math.atan2(yB-yA,70);const tx=ex+10*Math.cos(ang),ty=ey+10*Math.sin(ang);return p+`L${F(tx)} ${F(ty)}`+arrow(tx,ty,ang)}
+function fork(){let p=waveAlong(8,50,44,50,2,8);const up=waveAlong(44,50,86,20,4,6,u=>1-u*.4,240,false),dn=waveAlong(44,50,86,80,1,9,u=>1-u*.4,240,false);
+  const aU=Math.atan2(-30,42),aD=Math.atan2(30,42);return p+'M44 50'+up.slice(0)+arrow(86,20,aU)+'M44 50'+dn+arrow(86,80,aD)}
+function polarity(){let p=circ(9,22,50)+circ(9,78,50)+'M17 50L27 50M22 45L22 55M73 50L83 50';
+  p+='M30 44Q50 8 70 44'+arrow(53,26.2,0)+'M30 56Q50 92 70 56'+arrow(53,73.8,0);return p}
+function triRay(){let p=circ(5);[1,1/2,1/3].forEach((v,i)=>{const a=-Math.PI/2+i*2*Math.PI/3;const r0=8,r1=8+38*v;const x0=50+r0*Math.cos(a),y0=50+r0*Math.sin(a),x1=50+r1*Math.cos(a),y1=50+r1*Math.sin(a);p+=`M${F(x0)} ${F(y0)}L${F(x1)} ${F(y1)}`+arrow(x1,y1,a)});return p}
+function stairs(){const steps=[1,.585,.415,.322,.263,.222];let x=10,y=88,p=`M${x} ${y}`;steps.forEach(h=>{y-=h*26;p+=`L${F(x)} ${F(y)}`;x+=12;p+=`L${F(x)} ${F(y)}`});
+  p+=`L${F(x+6)} ${F(y-6)}`+arrow(x+6,y-6,-Math.PI/4);return p}
+function fifthsPath(){const R=36;const pt=k=>{const a=-Math.PI/2+k*2*Math.PI/12;return[50+R*Math.cos(a),50+R*Math.sin(a)]};let p='';let prev;
+  for(let i=0;i<12;i++){const [x,y]=pt((i*7)%12);p+=(i?'L':'M')+F(x)+' '+F(y);if(i===11){const a=Math.atan2(y-prev[1],x-prev[0]);p+=arrow(x,y,a,6)}prev=[x,y]}
+  for(let k=0;k<12;k++){const [x,y]=pt(k);p+=circ(1.4,x,y)}return p}
+function ringOut(){return waveAlong(8,50,78,50,6,20,u=>Math.exp(-3.2*u))+'L92 50'+arrow(92,50,0)}
+function converge(){const a=waveAlong(8,24,52,50,2,5,null,200),b=waveAlong(8,76,52,50,2,5,null,200);const c=waveAlong(52,50,84,50,1.5,10,u=>1-u*.3,200,false);
+  return a+b+'M52 50'+c+'L92 50'+arrow(92,50,0)}
+function returnPath(){const b=Math.log(2)/(2*Math.PI);let p='';const n=300;let lx,ly,px,py;for(let i=0;i<=n;i++){const th=Math.PI*0.5+i/n*1.75*2*Math.PI;const r=8*Math.exp(b*th);const x=50+r*Math.cos(th),y=50+r*Math.sin(th);
+  p+=(i?'L':'M')+F(x)+' '+F(y);px=lx;py=ly;lx=x;ly=y}return p+arrow(lx,ly,Math.atan2(ly-py,lx-px))+circ(2.2)}
+const SYMS=[
+ {id:'fifth',name:'The Fifth',d:lissa(3,2,Math.PI/2),mean:'The path a point traces when two tones vibrate at a 3:2 ratio, the perfect fifth. It reads as a knot until you know it is a chord.'},
+ {id:'octave',name:'Octave Loop',d:circ(44)+lissa(2,1,0,28),mean:'A 2:1 ratio, the octave: the same note, one level up. Inside a circle it stands for "same trail, different you."'},
+ {id:'node',name:'Still Point',d:wave(),mean:'A string vibrating in its third harmonic. The dots are nodes, the places that never move while everything around them shakes.'},
+ {id:'ridge',name:'Overtone Ridge',d:ridge(),mean:'Bar heights of 1, 1/2, 1/3, 1/4, 1/5, 1/6, the harmonic series. Rearranged, it becomes a tree line or a mountain range.'},
+ {id:'coil',name:'Chameleon Coil',d:coil(),mean:'A spiral whose radius doubles on every turn (one octave per turn), with 12 ticks for the 12 notes. The curl of a chameleon tail is close to this curve.'},
+ {id:'hum',name:'The Hum',d:hum(),mean:'Rings sized 1, 1/2, 1/3, 1/4, 1/5. The overtones sitting inside one sustained hum.'},
+
+ {id:'rise',name:'Rising Tone',path:1,d:chirp(true),mean:'A wave climbing in pitch as it moves, its frequency speeding up along the path. Going higher: growth, the climb, the next trail.'},
+ {id:'fall',name:'Settling Tone',path:1,d:chirp(false),mean:'The same wave sliding down in pitch. Lower frequency, slower, calmer. The drive home after the trip.'},
+ {id:'fork',name:'The Fork',path:1,d:fork(),mean:'One tone splits: the upper path doubles its frequency (an octave up), the lower path halves it (an octave down). Two ways forward, both in harmony.'},
+ {id:'polar',name:'Polarity',path:1,d:polarity(),mean:'Positive and negative joined by field lines that run from + to −. Opposites that only make sense together.'},
+ {id:'tri',name:'Three Bearings',path:1,d:triRay(),mean:'Three directions with lengths of 1, 1/2 and 1/3, the first three harmonics. Direction without a compass: you pick the strength, not the heading.'},
+ {id:'stairs',name:'Overtone Stair',path:1,d:stairs(),mean:'The steps between notes of the harmonic series: octave, fifth, fourth, third. Each step is smaller than the last. Real climbs work that way too.'},
+ {id:'fifths',name:'Circle Walk',path:1,d:fifthsPath(),mean:'Twelve notes on a circle, walked by fifths. The path touches every note once and arrives one step from where it began.'},
+ {id:'ring',name:'Ring Out',path:1,d:ringOut(),mean:'A struck note fading as it travels, until only the direction is left. Let it go and keep moving.'},
+ {id:'merge',name:'Two Become One',path:1,d:converge(),mean:'Two waves in phase meet and add into one bigger wave (constructive interference). Made for couples, families, crews.'},
+ {id:'return',name:'Home Note',path:1,d:returnPath(),mean:'A spiral heading outward, one octave higher with every turn, with its starting point still marked at the center. However far the path goes, the home note stays the same.'},
+ {id:'peak',name:'Fifth Peak',d:fifthPeak(),mean:'A mountain holding the 3:2 figure: the trip and the tone together. A strong candidate for the shop logo.'}
+];
+function symSVG(s,col,sw=3){return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="${s.d}" fill="none" stroke="${col}" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round"/></svg>`}
+let DLS=null;try{if(window.claude&&window.claude.use)window.claude.use('downloads').then(n=>{DLS=n}).catch(()=>{})}catch(e){}
+function dl(blob,name){if(DLS){DLS.save({filename:name,data:blob}).catch(err=>{const m=document.querySelector('#expStat');if(m&&err&&err.code!=='declined')m.textContent='Save not available here. Open the HTML file directly to export.'});return}
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},500)}
+function renderSymGrid(){const col=$('#symCol').value;const bg=$('#symBg').value;const g=$('#symGrid');g.innerHTML='';SYMS.forEach(s=>{const d=document.createElement('div');d.className='card sym';
+  d.innerHTML=`<svg viewBox="-5 -5 110 110" style="background:${bg}"><path d="${s.d}" fill="none" stroke="${col}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg><h3>${s.name}${s.path?' <span class="flag" style="background:var(--accent)">path</span>':''}</h3><p>${s.mean}</p><div class="row"><button class="btn" data-a="svg">SVG</button><button class="btn" data-a="png">PNG</button><button class="btn" data-a="use">Use in Studio</button></div>`;
+  d.querySelector('[data-a=svg]').onclick=()=>dl(new Blob([symSVG(s,col)],{type:'image/svg+xml'}),'Chameleon '+s.name+'.svg');
+  d.querySelector('[data-a=png]').onclick=()=>{const c=document.createElement('canvas');c.width=c.height=2000;const x=c.getContext('2d');strokeSym(x,s,1000,1000,1800,col);c.toBlob(b=>dl(b,'Chameleon '+s.name+'.png'),'image/png')};
+  d.querySelector('[data-a=use]').onclick=()=>{$('#symSel').value=s.id;document.querySelector('nav button[data-tab=studio]').click();draw()};
+  g.appendChild(d)})}
+function strokeSym(ctx,s,cx,cy,size,col,lw=3.2){ctx.save();ctx.translate(cx-size/2,cy-size/2);ctx.scale(size/100,size/100);ctx.strokeStyle=col;ctx.lineWidth=lw;ctx.lineCap='round';ctx.lineJoin='round';ctx.stroke(new Path2D(s.d));ctx.restore()}
+$('#symCol').oninput=renderSymGrid;$('#symBg').oninput=renderSymGrid;
+[['Cream on black','#f2efe6','#1f1f1f'],['Gold on navy','#e0a24f','#1e2a44'],['Sage on forest','#a9c6a0','#2f4a3a'],['Teal on sand','#2f7d6d','#d8cbb0'],['Navy on white','#1e2a44','#f4f4f2'],['Rust on ivory','#b5562d','#efe7d6']].forEach(([n,f,b])=>{const btn=document.createElement('button');btn.className='btn';btn.style.cssText=`background:${b};color:${f};border-color:${f}`;btn.textContent=n;btn.onclick=()=>{$('#symCol').value=f;$('#symBg').value=b;renderSymGrid()};$('#symPre').appendChild(btn)});
+renderSymGrid();
+SYMS.forEach(s=>{const o=document.createElement('option');o.value=s.id;o.textContent=s.name;$('#symSel').appendChild(o)});
+
+/* ---------- SORTER ---------- */
+let items=[];const favs=new Set(store.get('cs_favs',[]));
+const keyOf=f=>f.name+'|'+f.size;
+async function analyze(file){
+  let bmp;try{bmp=await createImageBitmap(file)}catch(e){return null}
+  const W=bmp.width,H=bmp.height;const sc=256/Math.max(W,H);const w=Math.max(8,Math.round(W*sc)),h=Math.max(8,Math.round(H*sc));
+  const c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d',{willReadFrequently:true});x.drawImage(bmp,0,0,w,h);
+  const t=document.createElement('canvas');const ts=220/Math.max(W,H);t.width=Math.round(W*ts);t.height=Math.round(H*ts);t.getContext('2d').drawImage(bmp,0,0,t.width,t.height);bmp.close&&bmp.close();
+  const d=x.getImageData(0,0,w,h).data;const L=new Float32Array(w*h);let sum=0,sum2=0,rgS=0,rgS2=0,ybS=0,ybS2=0;
+  for(let i=0,j=0;i<d.length;i+=4,j++){const r=d[i],g=d[i+1],b=d[i+2];const l=.299*r+.587*g+.114*b;L[j]=l;sum+=l;sum2+=l*l;const rg=r-g,yb=.5*(r+g)-b;rgS+=rg;rgS2+=rg*rg;ybS+=yb;ybS2+=yb*yb}
+  const n=w*h;const mean=sum/n;const contrast=Math.sqrt(Math.max(0,sum2/n-mean*mean));
+  const sdRG=Math.sqrt(Math.max(0,rgS2/n-(rgS/n)**2)),sdYB=Math.sqrt(Math.max(0,ybS2/n-(ybS/n)**2));const color=Math.sqrt(sdRG*sdRG+sdYB*sdYB)+.3*Math.sqrt((rgS/n)**2+(ybS/n)**2);
+  let ls=0,ls2=0,m=0;for(let yy=1;yy<h-1;yy++)for(let xx=1;xx<w-1;xx++){const k=yy*w+xx;const v=4*L[k]-L[k-1]-L[k+1]-L[k-w]-L[k+w];ls+=v;ls2+=v*v;m++}
+  const sharp=ls2/m-(ls/m)**2;
+  return {file,name:file.name,W,H,thumb:t.toDataURL('image/jpeg',.75),contrast,color,sharp,lowres:Math.min(W,H)<2400,mean};
+}
+function rankNorm(arr,key){const s=[...arr].sort((a,b)=>a[key]-b[key]);s.forEach((it,i)=>it[key+'N']=s.length>1?i/(s.length-1):1)}
+async function ingest(files){
+  files=[...files].filter(f=>/^image\//.test(f.type)||/\.(jpe?g|png|webp|gif|bmp|avif)$/i.test(f.name));
+  const prog=$('#prog');prog.hidden=false;prog.max=files.length;prog.value=0;let skipped=0;const out=[];
+  for(const f of files){const r=await analyze(f);if(r)out.push(r);else skipped++;prog.value++;$('#sortStat').textContent=`Scored ${prog.value} of ${files.length}…`}
+  items=items.concat(out);['contrast','color','sharp'].forEach(k=>rankNorm(items,k));
+  items.forEach(it=>{const exposure=1-Math.min(1,Math.abs(it.mean-128)/128);it.score=.45*it.sharpN+.25*it.contrastN+.25*it.colorN+.05*exposure-(it.lowres?.25:0)});
+  prog.hidden=true;$('#sortStat').textContent=`${items.length} photos scored.`+(skipped?` ${skipped} skipped (most likely HEIC/RAW files, which this browser can't read. Export those as JPG).`:'');renderGrid();
+}
+$('#dirIn').onchange=e=>ingest(e.target.files);$('#filesIn').onchange=e=>ingest(e.target.files);
+['showN','sortBy','hideLow'].forEach(id=>$('#'+id).onchange=renderGrid);
+function renderGrid(){const g=$('#grid');g.innerHTML='';const by=$('#sortBy').value;const key=by==='score'?'score':by+'N';
+  let list=[...items].sort((a,b)=>b[key]-a[key]);if($('#hideLow').checked)list=list.filter(i=>!i.lowres);
+  const sn=$('#showN').value;if(sn==='fav')list=list.filter(i=>favs.has(keyOf(i.file)));else list=list.slice(0,+sn);
+  list.forEach(it=>{const d=document.createElement('div');d.className='tile';const k=keyOf(it.file);
+    d.innerHTML=`<img src="${it.thumb}" alt=""><button class="star ${favs.has(k)?'on':''}">★</button><div class="meta"><div title="${it.name}" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${it.name}</div><div class="bar"><i style="width:${Math.max(4,Math.round(Math.max(0,it.score)*100))}%"></i></div><span class="muted">${it.W}×${it.H}</span> ${it.lowres?'<span class="flag">small for full print</span>':''}</div>`;
+    d.querySelector('img').onclick=()=>{loadSource(it.file);document.querySelector('nav button[data-tab=studio]').click()};
+    d.querySelector('.star').onclick=e=>{favs.has(k)?favs.delete(k):favs.add(k);e.target.classList.toggle('on');store.set('cs_favs',[...favs])};
+    g.appendChild(d)});
+  if(!list.length&&items.length)g.innerHTML='<p class="muted">Nothing matches that filter.</p>'}
+
+/* ---------- STUDIO ---------- */
+let src=null,palette=[];const pv=$('#pv');const W=4500,H=5400;
+async function loadSource(file){try{src=await createImageBitmap(file)}catch(e){$('#srcInfo').textContent='Could not read that file (HEIC? export it as JPG).';return}
+  $('#srcInfo').textContent=`${file.name} · ${src.width}×${src.height}`;pickPalette();draw()}
+$('#photoIn').onchange=e=>e.target.files[0]&&loadSource(e.target.files[0]);
+function cropCanvas(w,h,blurPx){const c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d',{willReadFrequently:true});
+  const z=+$('#zoom').value/100;const sAsp=src.width/src.height,tAsp=w/h;let sw,sh;if(sAsp>tAsp){sh=src.height/z;sw=sh*tAsp}else{sw=src.width/z;sh=sw/tAsp}
+  const sx=(src.width-sw)*(+$('#panX').value/100),sy=(src.height-sh)*(+$('#panY').value/100);
+  if(blurPx>0)x.filter=`blur(${blurPx}px)`;x.drawImage(src,sx,sy,sw,sh,0,0,w,h);return c}
+function artDims(totalW){const shape=$('#shape').value;const w=Math.round(totalW*(+$('#artW').value/100));let h=w;
+  if(shape==='rect'&&src){h=Math.round(w*Math.min(1.25,src.height/src.width))}else if(shape==='arch')h=Math.round(w*1.2);else if(shape==='tri')h=Math.round(w*.88);else if(shape==='hex')h=Math.round(w*.8);return[w,h]}
+function pickPalette(){if(!src)return;const k=+$('#k').value;const c=cropCanvas(160,160,+$('#blur').value*.4);const d=c.getContext('2d').getImageData(0,0,160,160).data;
+  const pts=[];for(let i=0;i<d.length;i+=4)pts.push([d[i],d[i+1],d[i+2]]);
+  let cen=[pts[Math.floor(pts.length/2)]];while(cen.length<k){let best=null,bd=-1;for(let i=0;i<pts.length;i+=7){let md=1e9;for(const c of cen){const dd=(pts[i][0]-c[0])**2+(pts[i][1]-c[1])**2+(pts[i][2]-c[2])**2;if(dd<md)md=dd}if(md>bd){bd=md;best=pts[i]}}cen.push(best.slice())}
+  for(let it=0;it<12;it++){const acc=cen.map(()=>[0,0,0,0]);for(const p of pts){let bi=0,bd=1e9;cen.forEach((c,ci)=>{const dd=(p[0]-c[0])**2+(p[1]-c[1])**2+(p[2]-c[2])**2;if(dd<bd){bd=dd;bi=ci}});const a=acc[bi];a[0]+=p[0];a[1]+=p[1];a[2]+=p[2];a[3]++}
+    cen=cen.map((c,i)=>acc[i][3]?[acc[i][0]/acc[i][3],acc[i][1]/acc[i][3],acc[i][2]/acc[i][3]]:c)}
+  palette=cen.map(c=>c.map(v=>Math.round(v))).sort((a,b)=>(.299*a[0]+.587*a[1]+.114*a[2])-(.299*b[0]+.587*b[1]+.114*b[2]));defaultKnock();renderPal()}
+const hex=c=>'#'+c.map(v=>v.toString(16).padStart(2,'0')).join('');const unhex=h=>[1,3,5].map(i=>parseInt(h.substr(i,2),16));
+let knockSet=new Set([0]);
+function shirtHex(){const v=$('#shirt').value;return v==='custom'?$('#shirtX').value:v}
+const lum=c=>.299*c[0]+.587*c[1]+.114*c[2];
+function defaultKnock(){knockSet=new Set([lum(unhex(shirtHex()))<128?0:palette.length-1])}
+function renderPal(){const p=$('#pal');p.innerHTML='';palette.forEach((c,i)=>{const w=document.createElement('div');w.className='swc';const inp=document.createElement('input');inp.type='color';inp.value=hex(c);inp.oninput=()=>{palette[i]=unhex(inp.value);draw()};
+  const b=document.createElement('button');b.textContent=knockSet.has(i)?'Out':'Ink';b.className=knockSet.has(i)?'ko':'';b.title='Toggle: print this color, or leave it out so the shirt shows';b.onclick=()=>{knockSet.has(i)?knockSet.delete(i):knockSet.add(i);renderPal();draw()};
+  w.appendChild(inp);w.appendChild(b);p.appendChild(w)});
+  const t=$('#txtC');const prev=t.value;t.innerHTML='';palette.forEach((c,i)=>{const o=document.createElement('option');o.value=i;o.textContent='Palette '+(i+1)+(i===0?' (darkest)':i===palette.length-1?' (lightest)':'');t.appendChild(o)});
+  const cu=document.createElement('option');cu.value='custom';cu.textContent='Custom (picker)';t.appendChild(cu);
+  t.value=prev&&(prev==='custom'||+prev<palette.length)?prev:String(lum(unhex(shirtHex()))<128?palette.length-1:0);
+  const sc=$('#symC');const sp=sc.value||'text';sc.innerHTML='<option value="text">Same as text</option>';palette.forEach((c,i)=>{const o=document.createElement('option');o.value=i;o.textContent='Palette '+(i+1);sc.appendChild(o)});const so=document.createElement('option');so.value='custom';so.textContent='Custom (picker)';sc.appendChild(so);sc.value=[...sc.options].some(o=>o.value===sp)?sp:'text'}
+function shapePath(ctx,w,h){const s=$('#shape').value;ctx.beginPath();
+  if(s==='circle'){ctx.arc(w/2,h/2,Math.min(w,h)/2,0,Math.PI*2)}else if(s==='tri'){ctx.moveTo(w/2,0);ctx.lineTo(w,h);ctx.lineTo(0,h);ctx.closePath()}
+  else if(s==='arch'){ctx.moveTo(0,h);ctx.lineTo(0,w/2);ctx.arc(w/2,w/2,w/2,Math.PI,0);ctx.lineTo(w,h);ctx.closePath()}
+  else if(s==='hex'){ctx.moveTo(w*.25,0);ctx.lineTo(w*.75,0);ctx.lineTo(w,h/2);ctx.lineTo(w*.75,h);ctx.lineTo(w*.25,h);ctx.lineTo(0,h/2);ctx.closePath()}
+  else ctx.rect(0,0,w,h)}
+function buildArt(w,h,scale){const c=cropCanvas(w,h,+$('#blur').value*scale*2.2);const x=c.getContext('2d',{willReadFrequently:true});const im=x.getImageData(0,0,w,h);const d=im.data;
+  const P=palette,n=P.length,neg=$('#neg').checked,sh=unhex(shirtHex()),bl=+$('#blend').value;
+  const KO=new Uint8Array(n);for(let j=0;j<n;j++){const o=P[j];KO[j]=(knockSet.has(j)||Math.sqrt((o[0]-sh[0])**2+(o[1]-sh[1])**2+(o[2]-sh[2])**2)<bl)?1:0}
+  for(let i=0;i<d.length;i+=4){let bi=0,bd=1e9;for(let j=0;j<n;j++){const p=P[j];const dd=(d[i]-p[0])**2+(d[i+1]-p[1])**2+(d[i+2]-p[2])**2;if(dd<bd){bd=dd;bi=j}}
+    if(neg)bi=n-1-bi;const p=P[bi];d[i]=p[0];d[i+1]=p[1];d[i+2]=p[2];d[i+3]=KO[bi]?0:255}
+  x.putImageData(im,0,0);
+  /* hard-edged mask: draw shape into alpha-only canvas, then threshold so no semi-transparent edge pixels */
+  const m=document.createElement('canvas');m.width=w;m.height=h;const mx=m.getContext('2d',{willReadFrequently:true});shapePath(mx,w,h);mx.fillStyle='#000';mx.fill();
+  const md=mx.getImageData(0,0,w,h).data;
+  /* dissolve: blurred copy of the shape gives distance-to-edge; pixels drop out by a grain pattern, so every pixel stays fully solid or fully clear */
+  const edge=$('#edge').value,depth=+$('#edgeD').value/100,cell=Math.max(1,Math.round(+$('#grain').value*scale*5));let bd=null;
+  if(edge==='dissolve'){const b=document.createElement('canvas');b.width=w;b.height=h;const bx=b.getContext('2d',{willReadFrequently:true});bx.filter=`blur(${Math.max(1,Math.round(Math.min(w,h)*depth/2))}px)`;shapePath(bx,w,h);bx.fillStyle='#000';bx.fill();bd=bx.getImageData(0,0,w,h).data}
+  const rnd=(cx,cy)=>{let t=(cx*374761393+cy*668265263)|0;t=(t^(t>>>13))*1274126177|0;return((t^(t>>>16))>>>0)/4294967295};
+  const ad=x.getImageData(0,0,w,h);const A=ad.data;let inMask=0,inked=0;const dh=Math.max(1,depth*h);
+  for(let y=0;y<h;y++){for(let xx=0;xx<w;xx++){const i=(y*w+xx)*4+3;if(md[i]<128){A[i]=0;continue}inMask++;
+    let keep=1;if(bd){keep=Math.max(0,Math.min(1,(bd[i]/255-.5)*2))}else if(edge!=='hard'){const top=Math.min(1,y/dh),bot=Math.min(1,(h-1-y)/dh);keep=edge==='fadeT'?top:edge==='fadeB'?bot:Math.min(top,bot)}
+    if(keep<1&&rnd((xx/cell)|0,(y/cell)|0)>keep)A[i]=0;if(A[i])inked++}}
+  x.putImageData(ad,0,0);lastCov=inMask?inked/inMask:0;return c}
+let lastCov=0;
+function setV(id,v){const e=$('#'+id);if(e.type==='checkbox')e.checked=v;else e.value=v;e.dispatchEvent(new Event('input'))}
+document.querySelectorAll('[data-look]').forEach(b=>b.onclick=()=>{if(!palette.length)return;const L=b.dataset.look,n=palette.length,dark=lum(unhex(shirtHex()))<128;
+  if(L==='soft'){knockSet=new Set([0,n-1]);setV('blend',60);setV('neg',false);setV('edge','dissolve');setV('edgeD',25)}
+  if(L==='bal'){knockSet=new Set([dark?0:n-1]);setV('blend',30);setV('neg',false);setV('edge','dissolve');setV('edgeD',12)}
+  if(L==='bold'){knockSet=new Set();setV('blend',0);setV('neg',false);setV('edge','hard')}
+  if(L==='ghost'){knockSet=new Set([0,1].filter(i=>i<n));setV('blend',40);setV('neg',true);setV('edge','fadeTB');setV('edgeD',30)}
+  renderPal();draw()});
+function compose(ctx,CW,CH,scale){ctx.clearRect(0,0,CW,CH);if(!src||!palette.length)return;
+  const [aw,ah]=artDims(CW);const ax=Math.round((CW-aw)/2),ay=Math.round(CH*.04);ctx.drawImage(buildArt(aw,ah,scale),ax,ay);
+  let y=ay+ah;const tv=$('#txtC').value;const col=tv==='custom'?$('#txtX').value:hex(palette[+tv]||palette[palette.length-1]);const sv=$('#symC').value;const scol=sv==='custom'?$('#symX').value:sv==='text'?col:hex(palette[+sv]||palette[0]);const slw=+$('#symW').value/10;const t=$('#txt').value.trim();
+  if(t){const fs=Math.round(+$('#txtS').value*scale);ctx.fillStyle=col;ctx.font=`700 ${fs}px "${$('#font').value}", Georgia, serif`;ctx.textAlign='center';ctx.textBaseline='top';
+    if('letterSpacing' in ctx)ctx.letterSpacing=Math.round(fs*.12)+'px';let txt=t.toUpperCase();while(ctx.measureText(txt).width>CW*.96&&txt.length>1){ctx.font=ctx.font.replace(/\d+px/,m=>(parseInt(m)*.95|0)+'px')}
+    y+=Math.round(fs*.45);ctx.fillText(txt,CW/2,y);y+=fs}
+  const sid=$('#symSel').value;if(sid){const s=SYMS.find(z=>z.id===sid);const ss=+$('#symS').value*scale;const pos=$('#symPos').value;
+    if(pos==='below')strokeSym(ctx,s,CW/2,y+ss*.6,ss,scol,slw);else if(pos==='center')strokeSym(ctx,s,ax+aw/2,ay+ah/2,ss,scol,slw);else strokeSym(ctx,s,ax+aw-ss*.55,ay+ah-ss*.55,ss,scol,slw)}
+  /* final pass: kill any anti-aliased half-alpha pixels (printer underbase trap) */
+  const im=ctx.getImageData(0,0,CW,CH);const d=im.data;for(let i=3;i<d.length;i+=4){d[i]=d[i]<128?0:255}ctx.putImageData(im,0,0)}
+let raf=0;function draw(){cancelAnimationFrame(raf);raf=requestAnimationFrame(()=>{compose(pv.getContext('2d',{willReadFrequently:true}),900,1080,.2);
+  if(src){const pc=Math.round(lastCov*100);$('#cov').textContent=`Ink coverage: ${pc}% of the art area. `+(pc<45?'Light, soft overlay feel.':pc<70?'Balanced.':'Heavy print. Knock out a color or raise blend to soften it.')}
+  if(src){const [aw]=artDims(W);const z=+$('#zoom').value/100;const effPx=Math.min(src.width,src.height)/z;const need=aw*(+$('#artW').value>0?1:1);
+    $('#resWarn').textContent=effPx<need*.5?`Heads up: the cropped photo is only about ${Math.round(effPx)} px across for a ${aw} px print. Posterizing hides a lot, but use a bigger original if she has one.`:''}})}
+['k'].forEach(id=>$('#'+id).oninput=()=>{$('#kV').textContent=$('#k').value;pickPalette();draw()});
+$('#blur').oninput=()=>{$('#blurV').textContent=$('#blur').value;draw()};
+$('#repal').onclick=()=>{pickPalette();draw()};
+['blend','neg','edge','edgeD','grain','txtX','symC','symX','symW','shape','zoom','panX','panY','artW','txt','font','txtS','txtC','symSel','symPos','symS'].forEach(id=>{const el=$('#'+id);el.oninput=el.onchange=draw});
+function shirtChanged(){$('#shirtPath').setAttribute('fill',shirtHex());draw()}
+$('#shirt').onchange=shirtChanged;$('#shirtX').oninput=()=>{$('#shirt').value='custom';shirtChanged()};
+$('#blend').addEventListener('input',()=>$('#blendV').textContent=$('#blend').value);$('#edgeD').addEventListener('input',()=>$('#edgeDV').textContent=$('#edgeD').value);
+$('#exp').onclick=()=>{if(!src)return alert('Load a photo first.');$('#expStat').textContent='Building full-size file… (a few seconds)';
+  setTimeout(()=>{const c=document.createElement('canvas');c.width=W;c.height=H;compose(c.getContext('2d',{willReadFrequently:true}),W,H,1);
+    c.toBlob(b=>{dl(b,'Chameleon Print '+new Date().toISOString().slice(0,10)+'.png');$('#expStat').textContent='Exported 4500 × 5400 transparent PNG. Upload it straight to Printify.'},'image/png')},30)};
+$('#expMock').onclick=()=>{if(!src)return;const c=document.createElement('canvas');c.width=1600;c.height=1680;const x=c.getContext('2d');
+  x.fillStyle='#e9e7e2';x.fillRect(0,0,1600,1680);x.save();x.scale(4,4);x.fillStyle=shirtHex();x.fill(new Path2D($('#shirtPath').getAttribute('d')));x.restore();
+  x.drawImage(pv,1600*.26,1680*.17,1600*.48,1600*.48*1.2);c.toBlob(b=>dl(b,'Chameleon Mockup.png'),'image/png')};
+})();
+</script>
+</body>
+</html>
