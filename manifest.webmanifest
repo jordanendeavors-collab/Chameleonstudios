@@ -1,0 +1,13 @@
+{
+  "name": "Chameleon Generator",
+  "short_name": "Chameleon",
+  "description": "Sketch to art magic.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#141018",
+  "theme_color": "#141018",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
